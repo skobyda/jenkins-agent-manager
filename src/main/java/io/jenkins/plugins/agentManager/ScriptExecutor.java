@@ -8,7 +8,6 @@ import hudson.tasks.Builder;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -30,14 +29,18 @@ public class ScriptExecutor extends Builder implements SimpleBuildStep {
 
     @Override
     public void perform(Run<?, ?> run, FilePath workspace, EnvVars env, Launcher launcher, TaskListener listener) throws InterruptedException, IOException {
-        List<String> arguments = Arrays.asList("echo", "$PWD");
         Node node = Computer.currentComputer().getNode();
         ScriptNodeProperty scriptProperty = node.getNodeProperties().get(ScriptNodeProperty.class);
 
         if (scriptProperty != null) {
-            String postBuildScript = scriptProperty.getScript();
-            List parsedScript = parseScript(postBuildScript);
-            launcher.launch().cmds(parsedScript).stdout(listener).join();
+            List<ScriptNodeProperty.ScriptInstance> scripts = scriptProperty.getScripts();
+            for (ScriptNodeProperty.ScriptInstance script : scripts) {
+                String scriptContent = script.getScript();
+                // String language = script.getLanguage();
+                // TODO implement different handling for groovy scripts
+                List parsedScript = parseScript(scriptContent);
+                launcher.launch().cmds(parsedScript).stdout(listener).join();
+            }
         }
     }
 }

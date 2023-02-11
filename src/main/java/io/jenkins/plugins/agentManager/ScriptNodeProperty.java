@@ -4,48 +4,71 @@ import hudson.Extension;
 import hudson.model.Node;
 import hudson.slaves.NodeProperty;
 import hudson.slaves.NodePropertyDescriptor;
-import net.sf.json.JSONObject;
 
+import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 
 public class ScriptNodeProperty extends NodeProperty<Node> {
-    private final String script;
+    /**
+     * Override locations. Never null.
+     */
+    private final List<ScriptInstance> scripts;
 
     @DataBoundConstructor
-    public ScriptNodeProperty(String script) {
-        this.script = script;
+    public ScriptNodeProperty(List<ScriptInstance> scripts) {
+        if (scripts == null) {
+            scripts = new ArrayList<>();
+        }
+        this.scripts = scripts;
     }
 
-    public String getScript() {
-        return script;
+    public ScriptNodeProperty(ScriptInstance... scripts) {
+        this(Arrays.asList(scripts));
     }
 
-    @Extension
+    public List<ScriptInstance> getScripts() {
+        return Collections.unmodifiableList(this.scripts);
+    }
+
+    @Extension @Symbol("script")
     public static class DescriptorImpl extends NodePropertyDescriptor {
         @Override
         public boolean isApplicable(Class<? extends Node> nodeType) {
             return true;
         }
 
-        @Override
-        public NodeProperty<?> newInstance(
-                final StaplerRequest req,
-                final JSONObject formData
-        ) throws FormException {
-
-            final String script = formData.getString("script");
-
-            if (script == null && script.isEmpty() && script.isEmpty())
-                return null;
-
-            return new ScriptNodeProperty(script);
-        }
+        // TODO do a form validation
+        // TODO add a help
 
         @Override
         public String getDisplayName() {
             return "Post-build script";
         }
     }
+
+    public static final class ScriptInstance {
+        private final String script;
+        private final String language;
+
+        @DataBoundConstructor
+        public ScriptInstance(String script, String language) {
+            this.script = script;
+            this.language = language;
+        }
+
+        public String getScript() {
+            return script;
+        }
+
+        public String getLanguage() {
+            return language;
+        }
+    }
+
 }
