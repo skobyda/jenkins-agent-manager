@@ -55,11 +55,13 @@ public class ScriptNodeProperty extends NodeProperty<Node> {
     public static final class ScriptInstance {
         private final String script;
         private final String language;
+        private final String trigger;
 
         @DataBoundConstructor
-        public ScriptInstance(String script, String language) {
+        public ScriptInstance(String script, String language, String trigger) {
             this.script = script;
             this.language = language;
+            this.trigger = trigger;
         }
 
         public String getScript() {
@@ -68,6 +70,10 @@ public class ScriptNodeProperty extends NodeProperty<Node> {
 
         public String getLanguage() {
             return language;
+        }
+
+        public String getTrigger() {
+            return trigger;
         }
     }
 
