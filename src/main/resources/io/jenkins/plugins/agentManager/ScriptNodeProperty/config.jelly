@@ -7,7 +7,7 @@
             <select  name="trigger" value="${script.trigger}">
                 <f:option selected="${script.trigger=='BEFORE'}" value="BEFORE">Before build</f:option>
                 <f:option selected="${script.trigger=='SUCCESS'}" value="SUCCESS">Successful build</f:option>
-                <f:option selected="${script.trigger=='FAIL'}" value="FAIL">Failed build</f:option>
+                <f:option selected="${script.trigger=='FAILURE'}" value="FAILURE">Failed build</f:option>
             </select>
         </f:entry>
         <f:entry title="Choose Language" field="language">

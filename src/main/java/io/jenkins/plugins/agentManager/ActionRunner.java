@@ -13,19 +13,26 @@ import java.util.Objects;
 public class ActionRunner {
     private static List <ScriptNodeProperty.ScriptInstance> getRelevantScripts(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
         if (isPreBuild) {
-            return getScriptsMatchingTriggers("BEFORE");
+            return getScriptsMatchingTriggers("BEFORE", listener);
         }
 
         Result result = run.getResult();
+        listener.getLogger().println(result);
+        listener.getLogger().println(result.toString());
 
         // result is only set after all post-build actions have run, as post-build actions also may fail
         // so the result == null means that build has not encountered any error yet
-        if (result == null) {
-            return getScriptsMatchingTriggers("SUCCESS");
+        // if (result == null) {
+        //     return getScriptsMatchingTriggers("SUCCESS", listener);
+        // }
+
+        // Mentioned above doesn't fit anymore. That used to work only if we extend BuildWrapper or BuildStep. Extending BuildListener we have a meaningful output
+        if (result == Result.SUCCESS) {
+            return getScriptsMatchingTriggers("SUCCESS", listener);
         }
 
         if (result == Result.FAILURE) {
-            return getScriptsMatchingTriggers("FAILURE");
+            return getScriptsMatchingTriggers("FAILURE", listener);
         }
 
         // TODO
@@ -33,18 +40,24 @@ public class ActionRunner {
         return new ArrayList<>();
     }
 
-    private static List <ScriptNodeProperty.ScriptInstance> getScriptsMatchingTriggers(String trigger) {
+    private static List <ScriptNodeProperty.ScriptInstance> getScriptsMatchingTriggers(String trigger, TaskListener listener) {
+        listener.getLogger().println(trigger);
+        listener.getLogger().println("HERE");
+
         List <ScriptNodeProperty.ScriptInstance> filtered = new ArrayList<>();
         List <ScriptNodeProperty.ScriptInstance> scripts = getAllNodeScripts();
 
         for (ScriptNodeProperty.ScriptInstance script : scripts) {
             String scriptTrigger = script.getTrigger();
 
+            listener.getLogger().println("HELLO");
+            listener.getLogger().println(scriptTrigger);
             if (trigger.equals(scriptTrigger)) {
                 filtered.add(script);
             }
         }
 
+        listener.getLogger().println(filtered);
         return filtered;
     }
 

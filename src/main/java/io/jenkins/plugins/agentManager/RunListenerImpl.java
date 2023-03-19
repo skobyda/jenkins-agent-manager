@@ -1,15 +1,13 @@
 package io.jenkins.plugins.agentManager;
 
-import hudson.Extension;
+/* import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.*;
-import hudson.tasks.BuildStepDescriptor;
-import hudson.tasks.Builder;
+import hudson.model.listeners.RunListener;
+import hudson.tasks.*;
 
 import java.io.IOException;
 
-import hudson.tasks.Notifier;
-import hudson.tasks.Publisher;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -29,10 +27,16 @@ public class PostBuildExecutor extends Notifier {
     @Override
     public boolean perform(AbstractBuild<?,?> run, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
         listener.getLogger().println("Running post-build executor");
+        listener.getLogger().println(run.getResult().toString());
 
         ActionRunner.act(launcher, listener, run, false);
 
         // TODO throw an error in case of failure
+        return true;
+    }
+
+    @Override
+    public boolean needsToRunAfterFinalized() {
         return true;
     }
 
@@ -48,5 +52,45 @@ public class PostBuildExecutor extends Notifier {
         public String getDisplayName() {
             return "Post-build script";
         }
+
+        // @Override
+        // public boolean needsToRunAfterFinalized() {
+        // }
+    }
+}
+*/
+
+import hudson.Extension;
+import hudson.Launcher;
+import hudson.model.*;
+import hudson.model.listeners.RunListener;
+import org.kohsuke.stapler.DataBoundConstructor;
+
+@Extension
+public class RunListenerImpl extends RunListener<Run<?, ?>> {
+    Launcher launcher;
+
+    @DataBoundConstructor
+    public RunListenerImpl() {
+        // noop
+    }
+
+    @Override
+    public Environment setUpEnvironment(AbstractBuild run, Launcher launcher, BuildListener listener) {
+        // TODO
+        // Research if saving launcher and keeping it alive is not incorrect
+        this.launcher = launcher;
+
+        ActionRunner.act(this.launcher, listener, run, true);
+
+        return new Environment() {};
+    }
+
+    @Override
+    public void onCompleted(Run<?, ?> run, TaskListener listener) {
+        listener.getLogger().println("Running post-build executor");
+        listener.getLogger().println(run.getResult().toString());
+
+        ActionRunner.act(this.launcher, listener, run, false);
     }
 }
