@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-<f:block>
+    <f:block>
     <f:repeatable var="script" name="scripts" items="${instance.scripts}">
         <f:entry title="Trigger actions" field="trigger">
-            <select  name="trigger" value="${script.trigger}">
-                <f:option selected="${script.trigger=='BEFORE'}" value="BEFORE">Before build</f:option>
-                <f:option selected="${script.trigger=='SUCCESS'}" value="SUCCESS">Successful build</f:option>
-                <f:option selected="${script.trigger=='FAILURE'}" value="FAILURE">Failed build</f:option>
-            </select>
+            <f:dropdownList name="trigger" >
+                <f:dropdownListBlock selected="${script.trigger=='BEFORE'}" value="BEFORE" title="Before build"/>
+                <f:dropdownListBlock selected="${script.trigger=='SUCCESS'}" value="SUCCESS" title="Successful build"/>
+                <f:dropdownListBlock selected="${script.trigger=='FAILURE'}" value="FAILURE" title="Failed build"/>
+            </f:dropdownList>
         </f:entry>
-        <f:entry title="Choose Language" field="language">
-            <select  name="language" value="${script.language}">
-                <f:option selected="${script.language=='BASH'}" value="BASH">Bash</f:option>
-                <f:option selected="${script.language=='GROOVY'}" value="GROOVY">Groovy</f:option>
-            </select>
-        </f:entry>
-        <f:entry field="script" title="Script" >
-            <f:textarea value="${script.script}" />
+
+        <f:entry title="Choose action" field="action">
+            <f:dropdownList name="action">
+                <f:dropdownListBlock selected="${script.action=='CLEANUP'}" value="CLEANUP" title="Clean up"/>
+                <f:dropdownListBlock selected="${script.action=='REBOOT'}" value="REBOOT" title="Reboot"/>
+                <f:dropdownListBlock selected="${script.action=='SCRIPT'}" value="SCRIPT" title="Run custom script">
+                    <f:entry field="script" title="Script" >
+                        <f:textarea value="${script.script}" />
+                    </f:entry>
+                </f:dropdownListBlock>
+            </f:dropdownList>
         </f:entry>
         <f:entry title="">
             <div align="right">
