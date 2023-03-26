@@ -2,7 +2,7 @@ package io.jenkins.plugins.agentManager.ScriptRunner;
 
 import hudson.Launcher;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.agentManager.ScriptNodeProperty;
+import io.jenkins.plugins.agentManager.ActionInstance;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,8 +23,8 @@ public class BashScriptRunner extends ScriptRunner {
         return arguments;
     }
 
-    public void run(Launcher launcher, TaskListener listener, ScriptNodeProperty.ScriptInstance script) {
-        String scriptContent = script.getScript();
+    public void run(Launcher launcher, TaskListener listener, ActionInstance.CustomScript script) {
+        String scriptContent = script.getScriptText();
         listener.getLogger().println(scriptContent);
 
         List parsedScript = parseScript(scriptContent);

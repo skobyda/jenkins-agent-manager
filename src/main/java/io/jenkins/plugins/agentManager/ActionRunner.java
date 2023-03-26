@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class ActionRunner {
-    private static List <ScriptNodeProperty.ScriptInstance> getRelevantScripts(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
+    private static List <ActionInstance> getRelevantScripts(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
         if (isPreBuild) {
-            return getScriptsMatchingTriggers("BEFORE", listener);
+            return getActionsMatchingTriggers("Before", listener);
         }
 
         Result result = run.getResult();
@@ -28,11 +28,11 @@ public class ActionRunner {
 
         // Mentioned above doesn't fit anymore. That used to work only if we extend BuildWrapper or BuildStep. Extending BuildListener we have a meaningful output
         if (result == Result.SUCCESS) {
-            return getScriptsMatchingTriggers("SUCCESS", listener);
+            return getActionsMatchingTriggers("Success", listener);
         }
 
         if (result == Result.FAILURE) {
-            return getScriptsMatchingTriggers("FAILURE", listener);
+            return getActionsMatchingTriggers("Failure", listener);
         }
 
         // TODO
@@ -40,20 +40,20 @@ public class ActionRunner {
         return new ArrayList<>();
     }
 
-    private static List <ScriptNodeProperty.ScriptInstance> getScriptsMatchingTriggers(String trigger, TaskListener listener) {
+    private static List <ActionInstance> getActionsMatchingTriggers(String trigger, TaskListener listener) {
         listener.getLogger().println(trigger);
         listener.getLogger().println("HERE");
 
-        List <ScriptNodeProperty.ScriptInstance> filtered = new ArrayList<>();
-        List <ScriptNodeProperty.ScriptInstance> scripts = getAllNodeScripts();
+        List <ActionInstance> filtered = new ArrayList<>();
+        List <ActionInstance> actions = getAllNodeActions();
 
-        for (ScriptNodeProperty.ScriptInstance script : scripts) {
-            String scriptTrigger = script.getTrigger();
+        for (ActionInstance action : actions) {
+            ActionInstance.Trigger actionTrigger = action.getTrigger();
 
             listener.getLogger().println("HELLO");
-            listener.getLogger().println(scriptTrigger);
-            if (trigger.equals(scriptTrigger)) {
-                filtered.add(script);
+            listener.getLogger().println(actionTrigger.name);
+            if (trigger.equals(actionTrigger.name)) {
+                filtered.add(action);
             }
         }
 
@@ -61,28 +61,33 @@ public class ActionRunner {
         return filtered;
     }
 
-    private static List <ScriptNodeProperty.ScriptInstance> getAllNodeScripts() {
+    private static List <ActionInstance> getAllNodeActions() {
         Node node = Computer.currentComputer().getNode();
-        ScriptNodeProperty scriptProperty = node.getNodeProperties().get(ScriptNodeProperty.class);
+        ActionNodeProperty actionNodeProperty = node.getNodeProperties().get(ActionNodeProperty.class);
         // TODO null handling
         // TODO, test also on project which do not have node assigned for computer which doesn't have agentManager setups
-        return scriptProperty.getScripts();
+        return actionNodeProperty.getActionInstances();
     }
 
     public static void act(Launcher launcher, TaskListener listener, Run<?,?>  run, Boolean isPreBuild) {
-        List <ScriptNodeProperty.ScriptInstance> scripts = getRelevantScripts(run, listener, isPreBuild);
+        List <ActionInstance> actions = getRelevantScripts(run, listener, isPreBuild);
+        listener.getLogger().println("RELEVANT SCRIPTS");
+        listener.getLogger().println(actions);
 
-        for (ScriptNodeProperty.ScriptInstance script : scripts) {
+        for (ActionInstance action : actions) {
             // TODO runScript should be a property of script?
-            runScript(launcher, listener, script);
+            action.getAction().name.equals("CustomScript");
+                listener.getLogger().println("Acting upon action");
+                listener.getLogger().println(action);
+                runScript(launcher, listener, (ActionInstance.CustomScript) action.getAction());
         }
     }
 
-    private static void runScript(Launcher launcher, TaskListener listener, ScriptNodeProperty.ScriptInstance script) {
+    private static void runScript(Launcher launcher, TaskListener listener, ActionInstance.CustomScript script) {
         // TODO
         // Use factory here
         ScriptRunner runner = null;
-        listener.getLogger().println(script.getLanguage());
+        listener.getLogger().println(script.getScriptText());
         if ("BASH".equals(script.getLanguage())) {
             runner = new BashScriptRunner();
         } else if ("GROOVY".equals(script.getLanguage())) {
