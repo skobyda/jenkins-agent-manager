@@ -61,14 +61,18 @@ public class PostBuildExecutor extends Notifier {
 */
 
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.swing.*;
+
 @Extension
 public class RunListenerImpl extends RunListener<Run<?, ?>> {
     Launcher launcher;
+    FilePath workspace;
 
     @DataBoundConstructor
     public RunListenerImpl() {
@@ -80,8 +84,11 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
         // TODO
         // Research if saving launcher and keeping it alive is not incorrect
         this.launcher = launcher;
+        this.workspace = run.getWorkspace();
+        listener.getLogger().println("setUpEnvironment");
+        listener.getLogger().println(this.workspace);
 
-        ActionRunner.act(this.launcher, listener, run, true);
+        ActionRunner.act(this.launcher, listener, run, workspace, true);
 
         return new Environment() {};
     }
@@ -89,8 +96,11 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
     @Override
     public void onCompleted(Run<?, ?> run, TaskListener listener) {
         listener.getLogger().println("Running post-build executor");
+        AbstractBuild build = (AbstractBuild) run;
+        listener.getLogger().println(build.getWorkspace());
+
         listener.getLogger().println(run.getResult().toString());
 
-        ActionRunner.act(this.launcher, listener, run, false);
+        ActionRunner.act(this.launcher, listener, run, workspace, false);
     }
 }

@@ -1,12 +1,18 @@
 package io.jenkins.plugins.agentManager;
 
+import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
+import hudson.util.RunList;
 import io.jenkins.plugins.agentManager.ScriptRunner.BashScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.GroovyScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.ScriptRunner;
+import jenkins.model.Jenkins;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -69,17 +75,26 @@ public class ActionRunner {
         return actionNodeProperty.getActionInstances();
     }
 
-    public static void act(Launcher launcher, TaskListener listener, Run<?,?>  run, Boolean isPreBuild) {
+    public static void act(Launcher launcher, TaskListener listener, Run<?,?> run, FilePath workspace, Boolean isPreBuild) {
         List <ActionInstance> actions = getRelevantScripts(run, listener, isPreBuild);
         listener.getLogger().println("RELEVANT SCRIPTS");
         listener.getLogger().println(actions);
 
         for (ActionInstance action : actions) {
+            listener.getLogger().println("Acting upon action");
+            listener.getLogger().println(action);
             // TODO runScript should be a property of script?
-            action.getAction().name.equals("CustomScript");
-                listener.getLogger().println("Acting upon action");
-                listener.getLogger().println(action);
-                runScript(launcher, listener, (ActionInstance.CustomScript) action.getAction());
+            switch(action.getAction().name) {
+                case "CustomScript":
+                    runScript(launcher, listener, (ActionInstance.CustomScript) action.getAction());
+                    break;
+                case "Cleanup":
+                    cleanup(launcher, listener, run, workspace);
+                    break;
+                default:
+                    // TODO fix error handling
+                    throw new IllegalArgumentException("Invalid action: " + action.getAction().name);
+            }
         }
     }
 
@@ -96,5 +111,57 @@ public class ActionRunner {
         listener.getLogger().println(runner);
 
         runner.run(launcher, listener, script);
+    }
+
+    private static void cleanup(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
+        listener.getLogger().println("Cleanup");
+        AbstractBuild build = (AbstractBuild) run;
+        FilePath workspacePath = build.getWorkspace();
+        listener.getLogger().println(build.getWorkspace());
+
+        try {
+            workspacePath.deleteRecursive();
+        } catch (IOException e) {
+            // TODO
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            // TODO
+            throw new RuntimeException(e);
+        }
+
+        // TODO clean all the other finished workspaces
+        /*
+        Computer computer = Computer.currentComputer();
+
+        // computer.setTemporarilyOffline(true, new hudson.slaves.OfflineCause.ByCLI("disk cleanup"));
+        Iterator<Run> runListIterator = computer.getBuilds().iterator();
+        Iterator<Run> runListIterator = computer.getBuilds();
+
+        while (runListIterator.hasNext()) {
+            Run run = runListIterator.next();
+
+            if (run.isBuilding())
+                continue;
+
+            // TODO check if workspace is in use
+
+            workspacePath = node.getWorkspaceFor(item)
+            if (workspacePath == null) {
+                continue
+            }
+            customWorkspace = item.getCustomWorkspace()
+            if (customWorkspace != null) {
+                workspacePath = node.getRootPath().child(customWorkspace)
+            }
+
+            pathAsString = workspacePath.getRemote()
+            if (workspacePath.exists()) {
+                workspacePath.deleteRecursive()
+            } else {
+            }
+        }
+
+        computer.setTemporarilyOffline(false, null)
+         */
     }
 }
