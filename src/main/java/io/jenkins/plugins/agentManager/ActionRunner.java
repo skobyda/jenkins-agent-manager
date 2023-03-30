@@ -3,11 +3,14 @@ package io.jenkins.plugins.agentManager;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
+import hudson.slaves.OfflineCause;
 import hudson.util.RunList;
 import io.jenkins.plugins.agentManager.ScriptRunner.BashScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.GroovyScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.ScriptRunner;
 import jenkins.model.Jenkins;
+import org.jvnet.localizer.Localizable;
+import org.jvnet.localizer.ResourceBundleHolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,6 +94,9 @@ public class ActionRunner {
                 case "Cleanup":
                     cleanup(launcher, listener, run, workspace);
                     break;
+                case "Reboot":
+                    // reboot(launcher, listener, run, workspace);
+                    break;
                 default:
                     // TODO fix error handling
                     throw new IllegalArgumentException("Invalid action: " + action.getAction().name);
@@ -111,6 +117,35 @@ public class ActionRunner {
         listener.getLogger().println(runner);
 
         runner.run(launcher, listener, script);
+    }
+
+    private static void reboot(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
+        listener.getLogger().println("Reboot");
+        Computer computer = Computer.currentComputer();
+
+        // if (computer != null)
+        //     TODO
+
+        OfflineCause cause = new OfflineCause();
+
+        computer.disconnect(OfflineCause.UserCause);
+
+            Executable currentExecutable = computer.getExecutors().getCurrentExecutable();
+            if (currentExecutable != null) {
+                QueueTaskFuture<?> future = currentExecutable.getOwnerTask().getFuture();
+                if (future != null) {
+                    future.waitForCompletion(10, TimeUnit.SECONDS);
+                }
+            }
+        }
+
+        // Reconnect the computer
+        if (computer != null) {
+            computer.connect(false);
+        }
+
+        // One way to achieve reboot is to call getBuilds() for computer, then get estimated time for finish for each build, and wait in cycle for builds to finish
+        // Once all the builds finish, we can do a graceful reboot
     }
 
     private static void cleanup(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
