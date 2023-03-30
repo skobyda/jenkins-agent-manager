@@ -97,6 +97,9 @@ public class ActionRunner {
                 case "Reboot":
                     // reboot(launcher, listener, run, workspace);
                     break;
+                case "SetOffline":
+                    setOffline(listener, run);
+                    break;
                 default:
                     // TODO fix error handling
                     throw new IllegalArgumentException("Invalid action: " + action.getAction().name);
@@ -119,7 +122,25 @@ public class ActionRunner {
         runner.run(launcher, listener, script);
     }
 
-    private static void reboot(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
+    private static void setOffline(TaskListener listener, Run run) {
+        listener.getLogger().println("Set offline");
+        Computer computer = Computer.currentComputer();
+
+        // if (computer != null)
+        //     TODO
+
+        // TODO localization
+        ResourceBundleHolder holder = ResourceBundleHolder.get(Messages.class);
+        User user = User.current();
+        int buildNumber = run.getNumber();
+        String buildName = run.getFullDisplayName();
+        String nodeName = computer.getNode().getDisplayName();
+        String offlineMessage = String.format("Taking node '%s' offline temporarily. Triggered by build '%s' number '%d'", nodeName, buildName, buildNumber);
+
+        // TODO research if ByCLI should be used instead
+        computer.setTemporarilyOffline(true, new OfflineCause.ByCLI(offlineMessage));
+    }
+    /* private static void reboot(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
         listener.getLogger().println("Reboot");
         Computer computer = Computer.currentComputer();
 
@@ -146,7 +167,7 @@ public class ActionRunner {
 
         // One way to achieve reboot is to call getBuilds() for computer, then get estimated time for finish for each build, and wait in cycle for builds to finish
         // Once all the builds finish, we can do a graceful reboot
-    }
+    } */
 
     private static void cleanup(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
         listener.getLogger().println("Cleanup");

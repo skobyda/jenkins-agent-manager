@@ -125,7 +125,8 @@ public class ActionInstance extends NodeProperty<Node> {
             return new ListBoxModel(
                     new ListBoxModel.Option("Cleanup"),
                     new ListBoxModel.Option("Reboot"),
-                    new ListBoxModel.Option("Run CustomScript")
+                    new ListBoxModel.Option("SetOffline"),
+                    new ListBoxModel.Option("CustomScript")
             );
         }
 
@@ -158,6 +159,15 @@ public class ActionInstance extends NodeProperty<Node> {
     public static class Reboot extends Action {
         @DataBoundConstructor public Reboot() {
             super("Reboot");
+        }
+
+        @Extension
+        public static final class DescriptorImpl extends ActionDescriptor {}
+    }
+
+    public static class SetOffline extends Action {
+        @DataBoundConstructor public SetOffline() {
+            super("SetOffline");
         }
 
         @Extension
