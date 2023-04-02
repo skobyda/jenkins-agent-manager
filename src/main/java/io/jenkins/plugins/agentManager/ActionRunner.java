@@ -4,20 +4,16 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.slaves.OfflineCause;
-import hudson.util.RunList;
 import io.jenkins.plugins.agentManager.ScriptRunner.BashScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.GroovyScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.ScriptRunner;
-import jenkins.model.Jenkins;
-import org.jvnet.localizer.Localizable;
+import io.jenkins.plugins.agentManager.View.ActionInstance;
+import io.jenkins.plugins.agentManager.View.ActionNodeProperty;
 import org.jvnet.localizer.ResourceBundleHolder;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
 public class ActionRunner {
     private static List <ActionInstance> getRelevantScripts(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
@@ -60,8 +56,8 @@ public class ActionRunner {
             ActionInstance.Trigger actionTrigger = action.getTrigger();
 
             listener.getLogger().println("HELLO");
-            listener.getLogger().println(actionTrigger.name);
-            if (trigger.equals(actionTrigger.name)) {
+            listener.getLogger().println(actionTrigger.getName());
+            if (trigger.equals(actionTrigger.getName())) {
                 filtered.add(action);
             }
         }
@@ -87,9 +83,9 @@ public class ActionRunner {
             listener.getLogger().println("Acting upon action");
             listener.getLogger().println(action);
             // TODO runScript should be a property of script?
-            switch(action.getAction().name) {
+            switch(action.getAction().getName()) {
                 case "CustomScript":
-                    runScript(launcher, listener, (ActionInstance.CustomScript) action.getAction());
+                    runScript(launcher, listener, (ActionInstance.Action.CustomScript) action.getAction());
                     break;
                 case "Cleanup":
                     cleanup(launcher, listener, run, workspace);
@@ -102,12 +98,12 @@ public class ActionRunner {
                     break;
                 default:
                     // TODO fix error handling
-                    throw new IllegalArgumentException("Invalid action: " + action.getAction().name);
+                    throw new IllegalArgumentException("Invalid action: " + action.getAction().getName());
             }
         }
     }
 
-    private static void runScript(Launcher launcher, TaskListener listener, ActionInstance.CustomScript script) {
+    private static void runScript(Launcher launcher, TaskListener listener, ActionInstance.Action.CustomScript script) {
         // TODO
         // Use factory here
         ScriptRunner runner = null;
@@ -120,6 +116,10 @@ public class ActionRunner {
         listener.getLogger().println(runner);
 
         runner.run(launcher, listener, script);
+    }
+
+    private static void getRunTime(TaskListener listener, Run run) {
+        run.getDuration();
     }
 
     private static void setOffline(TaskListener listener, Run run) {

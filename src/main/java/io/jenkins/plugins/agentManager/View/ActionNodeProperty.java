@@ -1,4 +1,4 @@
-package io.jenkins.plugins.agentManager;
+package io.jenkins.plugins.agentManager.View;
 
 import hudson.Extension;
 import hudson.model.Node;
@@ -21,7 +21,7 @@ public class ActionNodeProperty extends NodeProperty<Node> {
     public ActionNodeProperty(List<ActionInstance> actionInstances) {
         this.actionInstances = actionInstances;
         System.out.println("ActionNodeProperty");
-        System.out.println(actionInstances.get(0).getTrigger().name);
+        System.out.println(actionInstances.get(0).getTrigger().getName());
         System.out.println(actionInstances.get(0).getTrigger().getClass());
     }
 
