@@ -13,6 +13,7 @@ import jenkins.model.Jenkins;
 
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.springframework.lang.NonNull;
 
 public class ActionInstance extends NodeProperty<Node> {
     /**
@@ -94,7 +95,14 @@ public class ActionInstance extends NodeProperty<Node> {
         }
 
         @Extension
-        public static final class DescriptorImpl extends TriggerDescriptor {}
+        @Symbol("Failure")
+        public static final class DescriptorImpl extends TriggerDescriptor {
+            @NonNull
+            @Override
+            public String getDisplayName() {
+                return "After failed build";
+            }
+        }
     }
 
     public static class Before extends Trigger {
@@ -103,7 +111,14 @@ public class ActionInstance extends NodeProperty<Node> {
         }
 
         @Extension
-        public static final class DescriptorImpl extends TriggerDescriptor {}
+        @Symbol("Build")
+        public static final class DescriptorImpl extends TriggerDescriptor {
+            @NonNull
+            @Override
+            public String getDisplayName() {
+                return "Before build";
+            }
+        }
     }
 
     public static class Success extends Trigger {
@@ -112,7 +127,14 @@ public class ActionInstance extends NodeProperty<Node> {
         }
 
         @Extension
-        public static final class DescriptorImpl extends TriggerDescriptor {}
+        @Symbol("Success")
+        public static final class DescriptorImpl extends TriggerDescriptor {
+            @NonNull
+            @Override
+            public String getDisplayName() {
+                return "After successful build";
+            }
+        }
     }
 
     public static class ActionDescriptor extends Descriptor<Action> {}
@@ -153,7 +175,14 @@ public class ActionInstance extends NodeProperty<Node> {
         }
 
         @Extension
-        public static final class DescriptorImpl extends ActionDescriptor {}
+        @Symbol("Cleanup")
+        public static final class DescriptorImpl extends ActionDescriptor {
+            @NonNull
+            @Override
+            public String getDisplayName() {
+                return "Cleanup workspace";
+            }
+        }
     }
 
     public static class Reboot extends Action {
@@ -162,7 +191,14 @@ public class ActionInstance extends NodeProperty<Node> {
         }
 
         @Extension
-        public static final class DescriptorImpl extends ActionDescriptor {}
+        @Symbol("Reboot")
+        public static final class DescriptorImpl extends ActionDescriptor {
+            @NonNull
+            @Override
+            public String getDisplayName() {
+                return "Reboot agent";
+            }
+        }
     }
 
     public static class SetOffline extends Action {
@@ -171,7 +207,14 @@ public class ActionInstance extends NodeProperty<Node> {
         }
 
         @Extension
-        public static final class DescriptorImpl extends ActionDescriptor {}
+        @Symbol("SetOffline")
+        public static final class DescriptorImpl extends ActionDescriptor {
+            @NonNull
+            @Override
+            public String getDisplayName() {
+                return "Take agent offline";
+            }
+        }
     }
 
     public static class CustomScript extends Action {
@@ -193,7 +236,15 @@ public class ActionInstance extends NodeProperty<Node> {
         public String getLanguage() {
             return language;
         }
+
         @Extension
-        public static final class DescriptorImpl extends ActionDescriptor { }
+        @Symbol("CustomScript")
+        public static final class DescriptorImpl extends ActionDescriptor {
+            @NonNull
+            @Override
+            public String getDisplayName() {
+                return "Run custom script";
+            }
+        }
     }
 }
