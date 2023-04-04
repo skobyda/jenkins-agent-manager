@@ -2,7 +2,9 @@ package io.jenkins.plugins.agentManager.ScriptRunner;
 
 import hudson.Launcher;
 import hudson.model.TaskListener;
+import io.jenkins.plugins.agentManager.View.Action;
 import io.jenkins.plugins.agentManager.View.ActionInstance;
+import io.jenkins.plugins.agentManager.View.Condition;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ public class BashScriptRunner extends ScriptRunner {
         return launcher.launch().cmds(parsedScript).stdout(listener).join();
     }
 
-    public void run(Launcher launcher, TaskListener listener, ActionInstance.Action.CustomScript script) {
+    public void run(Launcher launcher, TaskListener listener, Action.CustomScript script) {
         String scriptContent = script.getScriptText();
 
         try {
@@ -44,7 +46,7 @@ public class BashScriptRunner extends ScriptRunner {
         }
     }
 
-    public boolean evaluateCondition(Launcher launcher, TaskListener listener, ActionInstance.Condition.Script script) {
+    public boolean evaluateCondition(Launcher launcher, TaskListener listener, Condition.Script script) {
         String scriptContent = script.getScriptText();
         listener.getLogger().println(scriptContent);
 

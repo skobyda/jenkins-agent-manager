@@ -10,6 +10,9 @@ import io.jenkins.plugins.agentManager.ScriptRunner.BatchScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.ScriptRunner;
 import io.jenkins.plugins.agentManager.View.ActionInstance;
 import io.jenkins.plugins.agentManager.View.ActionNodeProperty;
+import io.jenkins.plugins.agentManager.View.Condition;
+import io.jenkins.plugins.agentManager.View.Trigger;
+import io.jenkins.plugins.agentManager.View.Action;
 import org.jvnet.localizer.ResourceBundleHolder;
 
 import java.io.IOException;
@@ -17,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActionRunner {
-    private static boolean conditionDuration(ActionInstance.Condition.Duration duration, Run<?,?> run) {
+    private static boolean conditionDuration(Condition.Duration duration, Run<?,?> run) {
         long buildDuration = run.getDuration();
         String durationCondition = duration.getDurationCondition();
         String unit = duration.getUnit();
@@ -43,7 +46,7 @@ public class ActionRunner {
         return returnVal;
     }
 
-    private static boolean conditionScript(ActionInstance.Condition.Script script, TaskListener listener, Launcher launcher) {
+    private static boolean conditionScript(Condition.Script script, TaskListener listener, Launcher launcher) {
         ScriptRunner runner = null;
         listener.getLogger().println(script.getScriptText());
         if ("BASH".equals(script.getLanguage())) {
@@ -56,7 +59,7 @@ public class ActionRunner {
         return runner.evaluateCondition(launcher, listener, script);
     }
 
-    private static boolean conditionHistory(ActionInstance.Condition.History history, TaskListener listener, Launcher launcher) {
+    private static boolean conditionHistory(Condition.History history, TaskListener listener, Launcher launcher) {
         Computer computer = Computer.currentComputer();
         RunList<? extends Run<?, ?>> runList = computer.getBuilds();
         int quantity = history.getQuantity();
@@ -78,22 +81,22 @@ public class ActionRunner {
     private static List <ActionInstance> filterScriptsByCondition(Run<?,?> run, TaskListener listener,  Launcher launcher, List <ActionInstance> list) {
         List <ActionInstance> filtered = new ArrayList<>();
         for (ActionInstance action : list) {
-            ActionInstance.Condition condition = action.getCondition();
+            Condition condition = action.getCondition();
 
             switch(condition.getName()) {
                 case "Everytime":
                     filtered.add(action);
                     break;
                 case "Duration":
-                    if (conditionDuration((ActionInstance.Condition.Duration) condition, run))
+                    if (conditionDuration((Condition.Duration) condition, run))
                         filtered.add(action);
                     break;
                 case "Script":
-                    if (conditionScript((ActionInstance.Condition.Script) condition, listener, launcher))
+                    if (conditionScript((Condition.Script) condition, listener, launcher))
                         filtered.add(action);
                     break;
                 case "History":
-                    if (conditionHistory((ActionInstance.Condition.History) condition, listener, launcher))
+                    if (conditionHistory((Condition.History) condition, listener, launcher))
                         filtered.add(action);
                     break;
                 default:
@@ -149,7 +152,7 @@ public class ActionRunner {
         List <ActionInstance> actions = getAllNodeActions();
 
         for (ActionInstance action : actions) {
-            ActionInstance.Trigger actionTrigger = action.getTrigger();
+            Trigger actionTrigger = action.getTrigger();
 
             listener.getLogger().println("HELLO");
             listener.getLogger().println(actionTrigger.getName());
@@ -181,7 +184,7 @@ public class ActionRunner {
             // TODO runScript should be a property of script?
             switch(action.getAction().getName()) {
                 case "CustomScript":
-                    runScript(launcher, listener, (ActionInstance.Action.CustomScript) action.getAction());
+                    runScript(launcher, listener, (Action.CustomScript) action.getAction());
                     break;
                 case "Cleanup":
                     cleanup(launcher, listener, run, workspace);
@@ -199,7 +202,7 @@ public class ActionRunner {
         }
     }
 
-    private static void runScript(Launcher launcher, TaskListener listener, ActionInstance.Action.CustomScript script) {
+    private static void runScript(Launcher launcher, TaskListener listener, Action.CustomScript script) {
         // TODO
         // Use factory here
         ScriptRunner runner = null;

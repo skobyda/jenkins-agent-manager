@@ -2,8 +2,6 @@ package io.jenkins.plugins.agentManager.View;
 
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
-import hudson.ExtensionPoint;
-import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Node;
 import hudson.slaves.NodeProperty;
@@ -30,6 +28,42 @@ public class ActionInstance extends NodeProperty<Node> {
         this.trigger = trigger;
         this.condition = condition;
         this.action = action;
+    }
+
+    @Extension
+    @Symbol("actionInstance")
+    public static class ActionInstanceDescriptor extends NodePropertyDescriptor {
+        public ListBoxModel doFillTriggerItems() {
+            return new ListBoxModel(
+                    new ListBoxModel.Option("Before"),
+                    new ListBoxModel.Option("Success"),
+                    new ListBoxModel.Option("Failure")
+            );
+        }
+
+        public ListBoxModel doFillActionItems() {
+            return new ListBoxModel(
+                    new ListBoxModel.Option("Cleanup"),
+                    new ListBoxModel.Option("Reboot"),
+                    new ListBoxModel.Option("SetOffline"),
+                    new ListBoxModel.Option("CustomScript")
+            );
+        }
+
+        public ListBoxModel doFillConditionItems() {
+            return new ListBoxModel(
+                    new ListBoxModel.Option("Everytime"),
+                    new ListBoxModel.Option("Duration"),
+                    new ListBoxModel.Option("Script"),
+                    new ListBoxModel.Option("History")
+            );
+        }
+
+         // Prevents it from being seen as a separate node property in node configuration page
+        @Override
+        public boolean isApplicable(Class<? extends Node> nodeType) {
+            return false;
+        }
     }
 
     public Trigger getTrigger() {
@@ -72,370 +106,5 @@ public class ActionInstance extends NodeProperty<Node> {
 
     public DescriptorExtensionList<Action,Descriptor<Action>> getActionDescriptors() {
         return Jenkins.get().getDescriptorList(Action.class);
-    }
-
-    public static class TriggerDescriptor extends Descriptor<Trigger> {}
-
-    // Symbol links this class to jelly's f:repeatable's 'var' attribute
-    @Extension
-    @Symbol("trigger")
-    public static final class TriggerDescriptorImpl extends NodePropertyDescriptor {
-        public ListBoxModel doFillTriggerItems() {
-            return new ListBoxModel(
-                    new ListBoxModel.Option("Before"),
-                    new ListBoxModel.Option("Success"),
-                    new ListBoxModel.Option("Failure")
-            );
-        }
-
-        // Prevents it from being seen as a separate node property in node configuration page
-        @Override
-        public boolean isApplicable(Class<? extends Node> nodeType) {
-            return false;
-        }
-    }
-
-    public static abstract class Trigger implements ExtensionPoint, Describable<Trigger> {
-        protected String name;
-        protected Trigger(String name) { this.name = name; }
-
-        public String getName() {
-            return name;
-        }
-
-        public Descriptor<Trigger> getDescriptor() {
-            return Jenkins.get().getDescriptor(getClass());
-        }
-
-        public static class Failure extends Trigger {
-            @DataBoundConstructor public Failure() {
-                super("Failure");
-            }
-
-            @Extension
-            @Symbol("Failure")
-            public static final class DescriptorImpl extends TriggerDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "After failed build";
-                }
-            }
-        }
-
-        public static class Before extends Trigger {
-            @DataBoundConstructor public Before() {
-                super("Before");
-            }
-
-            @Extension
-            @Symbol("Build")
-            public static final class DescriptorImpl extends TriggerDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "Before build";
-                }
-            }
-        }
-
-        public static class Success extends Trigger {
-            @DataBoundConstructor public Success() {
-                super("Success");
-            }
-
-            @Extension
-            @Symbol("Success")
-            public static final class DescriptorImpl extends TriggerDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "After successful build";
-                }
-            }
-        }
-    }
-
-    public static class ConditionDescriptor extends Descriptor<Condition> {}
-
-    // Symbol links this class to jelly's f:repeatable's 'var' attribute
-    @Extension
-    @Symbol("condition")
-    public static final class ConditionDescriptorImpl extends NodePropertyDescriptor {
-        public ListBoxModel doFillConditionItems() {
-            return new ListBoxModel(
-                    new ListBoxModel.Option("Everytime"),
-                    new ListBoxModel.Option("Duration"),
-                    new ListBoxModel.Option("Script"),
-                    new ListBoxModel.Option("History")
-            );
-        }
-
-        // Prevents it from being seen as a separate node property in node configuration page
-        @Override
-        public boolean isApplicable(Class<? extends Node> nodeType) {
-            return false;
-        }
-    }
-
-    public static abstract class Condition implements ExtensionPoint, Describable<Condition> {
-        protected String name;
-        protected Condition(String name) { this.name = name; }
-
-        public String getName() {
-            return name;
-        }
-
-        public Descriptor<Condition> getDescriptor() {
-            return Jenkins.get().getDescriptor(getClass());
-        }
-
-        public static class Everytime extends Condition {
-            @DataBoundConstructor public Everytime() {
-                super("Everytime");
-            }
-
-            @Extension
-            @Symbol("Everytime")
-            public static final class DescriptorImpl extends ConditionDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "Everytime";
-                }
-            }
-        }
-
-        public static class Duration extends Condition {
-            private final String durationCondition;
-            private final long time;
-            private final String unit;
-
-            public String getDurationCondition() {
-                return durationCondition;
-            }
-
-            public long getTime() {
-                return time;
-            }
-
-            public String getUnit() {
-                return unit;
-            }
-
-            @DataBoundConstructor
-            public Duration(String durationCondition, long time, String unit) {
-                super("Duration");
-                this.durationCondition = durationCondition;
-                this.time = time;
-                this.unit = unit;
-            }
-
-            @Extension
-            @Symbol("Duration")
-            public static final class DescriptorImpl extends ConditionDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "Based on build duration";
-                }
-
-                public ListBoxModel doFillUnitItems() {
-                    return new ListBoxModel(
-                            new ListBoxModel.Option("milliseconds"),
-                            new ListBoxModel.Option("seconds"),
-                            new ListBoxModel.Option("minutes")
-                    );
-                }
-
-                public ListBoxModel doFillDurationConditionItems() {
-                    return new ListBoxModel(
-                            new ListBoxModel.Option("Build took more than"),
-                            new ListBoxModel.Option("Build took less than")
-                    );
-                }
-            }
-        }
-
-        public static class History extends Condition {
-            private final String historyCondition;
-            private final int quantity;
-
-            public String getHistoryCondition() {
-                return historyCondition;
-            }
-
-            public int getQuantity() {
-                return quantity;
-            }
-
-            @DataBoundConstructor
-            public History(String historyCondition, int quantity) {
-                super("History");
-                this.historyCondition = historyCondition;
-                this.quantity = quantity;
-            }
-
-            @Extension
-            @Symbol("History")
-            public static final class DescriptorImpl extends ConditionDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "Based on build history";
-                }
-
-                public ListBoxModel doFillHistoryConditionItems() {
-                    return new ListBoxModel(
-                            new ListBoxModel.Option("Builds keep failing"),
-                            new ListBoxModel.Option("Builds end too fast")
-                    );
-                }
-            }
-        }
-
-        public static class Script extends Condition {
-            private final String scriptText;
-            // TODO support groovy and windows thing
-            private final String language;
-            @DataBoundConstructor public Script(String scriptText) {
-                super("Script");
-                this.scriptText = scriptText;
-                this.language = "BASH";
-            }
-
-            public String getScriptText() {
-                return scriptText;
-            }
-
-            public String getLanguage() {
-                return language;
-            }
-
-            @Extension
-            @Symbol("Script")
-            public static final class DescriptorImpl extends ConditionDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "Script output";
-                }
-            }
-        }
-    }
-
-    public static class ActionDescriptor extends Descriptor<Action> {}
-
-    // Symbol links this class to jelly's f:repeatable's 'var' attribute
-    @Extension
-    @Symbol("action")
-    public static final class ActionDescriptorImpl extends NodePropertyDescriptor {
-        public ListBoxModel doFillActionItems() {
-            return new ListBoxModel(
-                    new ListBoxModel.Option("Cleanup"),
-                    new ListBoxModel.Option("Reboot"),
-                    new ListBoxModel.Option("SetOffline"),
-                    new ListBoxModel.Option("CustomScript")
-            );
-        }
-
-        // Prevents it from being seen as a separate node property in node configuration page
-        @Override
-        public boolean isApplicable(Class<? extends Node> nodeType) {
-            return false;
-        }
-    }
-
-
-    public static abstract class Action implements ExtensionPoint, Describable<Action> {
-        protected String name;
-        protected Action(String name) { this.name = name; }
-
-        public String getName() {
-            return name;
-        }
-
-        public Descriptor<Action> getDescriptor() {
-            return Jenkins.get().getDescriptor(getClass());
-        }
-
-        public static class Cleanup extends Action {
-            @DataBoundConstructor public Cleanup() {
-                super("Cleanup");
-            }
-
-            @Extension
-            @Symbol("Cleanup")
-            public static final class DescriptorImpl extends ActionDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "Cleanup workspace";
-                }
-            }
-        }
-
-        public static class Reboot extends Action {
-            @DataBoundConstructor public Reboot() {
-                super("Reboot");
-            }
-
-            @Extension
-            @Symbol("Reboot")
-            public static final class DescriptorImpl extends ActionDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "Reboot agent";
-                }
-            }
-        }
-
-        public static class SetOffline extends Action {
-            @DataBoundConstructor public SetOffline() {
-                super("SetOffline");
-            }
-
-            @Extension
-            @Symbol("SetOffline")
-            public static final class DescriptorImpl extends ActionDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "Take agent offline";
-                }
-            }
-        }
-
-        public static class CustomScript extends Action {
-            private final String scriptText;
-            // TODO support groovy and windows thing
-            private final String language;
-            @DataBoundConstructor public CustomScript(String scriptText) {
-                super("CustomScript");
-                System.out.println("CustomScript");
-                System.out.println(scriptText);
-                this.scriptText = scriptText;
-                this.language = "BASH";
-            }
-
-            public String getScriptText() {
-                return scriptText;
-            }
-
-            public String getLanguage() {
-                return language;
-            }
-
-            @Extension
-            @Symbol("CustomScript")
-            public static final class DescriptorImpl extends ActionDescriptor {
-                @NonNull
-                @Override
-                public String getDisplayName() {
-                    return "Run custom script";
-                }
-            }
-        }
     }
 }
