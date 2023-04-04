@@ -5,7 +5,7 @@ import hudson.Launcher;
 import hudson.model.*;
 import hudson.slaves.OfflineCause;
 import io.jenkins.plugins.agentManager.ScriptRunner.BashScriptRunner;
-import io.jenkins.plugins.agentManager.ScriptRunner.GroovyScriptRunner;
+import io.jenkins.plugins.agentManager.ScriptRunner.BatchScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.ScriptRunner;
 import io.jenkins.plugins.agentManager.View.ActionInstance;
 import io.jenkins.plugins.agentManager.View.ActionNodeProperty;
@@ -16,7 +16,73 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActionRunner {
-    private static List <ActionInstance> getRelevantScripts(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
+    private static boolean conditionDuration(ActionInstance.Condition.Duration duration, Run<?,?> run) {
+        long buildDuration = run.getDuration();
+        String durationCondition = duration.getDurationCondition();
+        String unit = duration.getUnit();
+        long time = duration.getTime();
+        long expectedDurationInMilliseconds;
+
+        if (unit.equals("milliseconds"))
+            expectedDurationInMilliseconds = time;
+        else if (unit.equals("seconds"))
+            expectedDurationInMilliseconds = time * 1000;
+        else if (unit.equals("minutes"))
+            expectedDurationInMilliseconds = time * 1000 * 60;
+        else
+            return false;
+            // TODO add exception or error message
+
+        boolean returnVal;
+        if (durationCondition.equals("Build took more than"))
+            returnVal = buildDuration > expectedDurationInMilliseconds;
+        else
+            returnVal = buildDuration < expectedDurationInMilliseconds;
+
+        return returnVal;
+    }
+
+    private static boolean conditionScript(ActionInstance.Condition.Script script, TaskListener listener, Launcher launcher) {
+        ScriptRunner runner = null;
+        listener.getLogger().println(script.getScriptText());
+        if ("BASH".equals(script.getLanguage())) {
+            runner = new BashScriptRunner();
+        } else if ("GROOVY".equals(script.getLanguage())) {
+            runner = new BatchScriptRunner();
+        }
+        listener.getLogger().println(runner);
+
+        return runner.evaluateCondition(launcher, listener, script);
+    }
+
+    private static List <ActionInstance> filterScriptsByCondition(Run<?,?> run, TaskListener listener,  Launcher launcher, List <ActionInstance> list) {
+        List <ActionInstance> filtered = new ArrayList<>();
+        for (ActionInstance action : list) {
+            ActionInstance.Condition condition = action.getCondition();
+
+            switch(condition.getName()) {
+                case "Everytime":
+                    filtered.add(action);
+                    break;
+                case "Duration":
+                    if (conditionDuration((ActionInstance.Condition.Duration) condition, run))
+                        filtered.add(action);
+                    break;
+                case "Script":
+                    if (conditionScript((ActionInstance.Condition.Script) condition, listener, launcher))
+                        filtered.add(action);
+                    break;
+                default:
+                    // TODO fix error handling
+                    throw new IllegalArgumentException("Invalid action: " + action.getAction().getName());
+            }
+        }
+
+        listener.getLogger().println(filtered);
+        return filtered;
+    }
+
+    private static List <ActionInstance> filterScriptsByTrigger(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
         if (isPreBuild) {
             return getActionsMatchingTriggers("Before", listener);
         }
@@ -43,6 +109,12 @@ public class ActionRunner {
         // TODO
         // result == Result.UNSTABLE or result == Result.ABRUPTED
         return new ArrayList<>();
+    }
+
+    private static List <ActionInstance> getRelevantScripts(Run<?,?> run, TaskListener listener, Launcher launcher, Boolean isPreBuild) {
+        List <ActionInstance> filteredList = filterScriptsByTrigger(run, listener, isPreBuild);
+
+        return filterScriptsByCondition(run, listener, launcher, filteredList);
     }
 
     private static List <ActionInstance> getActionsMatchingTriggers(String trigger, TaskListener listener) {
@@ -75,7 +147,7 @@ public class ActionRunner {
     }
 
     public static void act(Launcher launcher, TaskListener listener, Run<?,?> run, FilePath workspace, Boolean isPreBuild) {
-        List <ActionInstance> actions = getRelevantScripts(run, listener, isPreBuild);
+        List <ActionInstance> actions = getRelevantScripts(run, listener, launcher, isPreBuild);
         listener.getLogger().println("RELEVANT SCRIPTS");
         listener.getLogger().println(actions);
 
@@ -111,7 +183,7 @@ public class ActionRunner {
         if ("BASH".equals(script.getLanguage())) {
             runner = new BashScriptRunner();
         } else if ("GROOVY".equals(script.getLanguage())) {
-            runner = new GroovyScriptRunner();
+            runner = new BatchScriptRunner();
         }
         listener.getLogger().println(runner);
 

@@ -1,0 +1,12 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:entry field="durationCondition" title="Duration condition">
+        <f:select />
+    </f:entry>
+    <f:entry field="time" title="Duration">
+        <f:number name="time" value="${instance.time}"/>
+    </f:entry>
+    <f:entry field="unit" title="Time unit">
+        <f:select />
+    </f:entry>
+</j:jelly>

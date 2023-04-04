@@ -20,13 +20,15 @@ public class ActionInstance extends NodeProperty<Node> {
      * Override locations. Never null.
      */
     private Trigger trigger;
+    private Condition condition;
     private Action action;
 
     @DataBoundConstructor
-    public ActionInstance(Trigger trigger, Action action) {
+    public ActionInstance(Trigger trigger, Condition condition, Action action) {
         System.out.println("ActionInstance");
         System.out.println(trigger);
         this.trigger = trigger;
+        this.condition = condition;
         this.action = action;
     }
 
@@ -38,6 +40,16 @@ public class ActionInstance extends NodeProperty<Node> {
     public void setTrigger(Trigger trigger) {
         // Could return currently configured/saved item here to initialized form with this data
         this.trigger = trigger;
+    }
+
+    public Condition getCondition() {
+        // Could return currently configured/saved item here to initialized form with this data
+        return condition;
+    }
+
+    public void setCondition(Condition condition) {
+        // Could return currently configured/saved item here to initialized form with this data
+        this.condition = condition;
     }
 
     public Action getAction() {
@@ -52,6 +64,10 @@ public class ActionInstance extends NodeProperty<Node> {
 
     public DescriptorExtensionList<Trigger,Descriptor<Trigger>> getTriggerDescriptors() {
         return Jenkins.get().getDescriptorList(Trigger.class);
+    }
+
+    public DescriptorExtensionList<Condition,Descriptor<Condition>> getConditionDescriptors() {
+        return Jenkins.get().getDescriptorList(Condition.class);
     }
 
     public DescriptorExtensionList<Action,Descriptor<Action>> getActionDescriptors() {
@@ -135,6 +151,139 @@ public class ActionInstance extends NodeProperty<Node> {
                 @Override
                 public String getDisplayName() {
                     return "After successful build";
+                }
+            }
+        }
+    }
+
+    public static class ConditionDescriptor extends Descriptor<Condition> {}
+
+    // Symbol links this class to jelly's f:repeatable's 'var' attribute
+    @Extension
+    @Symbol("condition")
+    public static final class ConditionDescriptorImpl extends NodePropertyDescriptor {
+        public ListBoxModel doFillConditionItems() {
+            return new ListBoxModel(
+                    new ListBoxModel.Option("Everytime"),
+                    new ListBoxModel.Option("Duration"),
+                    new ListBoxModel.Option("Script")
+            );
+        }
+
+        // Prevents it from being seen as a separate node property in node configuration page
+        @Override
+        public boolean isApplicable(Class<? extends Node> nodeType) {
+            return false;
+        }
+    }
+
+    public static abstract class Condition implements ExtensionPoint, Describable<Condition> {
+        protected String name;
+        protected Condition(String name) { this.name = name; }
+
+        public String getName() {
+            return name;
+        }
+
+        public Descriptor<Condition> getDescriptor() {
+            return Jenkins.get().getDescriptor(getClass());
+        }
+
+        public static class Everytime extends Condition {
+            @DataBoundConstructor public Everytime() {
+                super("Everytime");
+            }
+
+            @Extension
+            @Symbol("Everytime")
+            public static final class DescriptorImpl extends ConditionDescriptor {
+                @NonNull
+                @Override
+                public String getDisplayName() {
+                    return "Everytime";
+                }
+            }
+        }
+
+        public static class Duration extends Condition {
+            private final String durationCondition;
+            private final long time;
+            private final String unit;
+
+            public String getDurationCondition() {
+                return durationCondition;
+            }
+
+            public long getTime() {
+                return time;
+            }
+
+            public String getUnit() {
+                return unit;
+            }
+
+            @DataBoundConstructor public Duration(String durationCondition, long time, String unit) {
+                super("Duration");
+                System.out.println("Duration");
+                System.out.println(durationCondition);
+                System.out.println(time);
+                System.out.println(unit);
+                this.durationCondition = durationCondition;
+                this.time = time;
+                this.unit = unit;
+            }
+
+            @Extension
+            @Symbol("Duration")
+            public static final class DescriptorImpl extends ConditionDescriptor {
+                @NonNull
+                @Override
+                public String getDisplayName() {
+                    return "Based on build duration";
+                }
+
+                public ListBoxModel doFillUnitItems() {
+                    return new ListBoxModel(
+                            new ListBoxModel.Option("milliseconds"),
+                            new ListBoxModel.Option("seconds"),
+                            new ListBoxModel.Option("minutes")
+                    );
+                }
+
+                public ListBoxModel doFillDurationConditionItems() {
+                    return new ListBoxModel(
+                            new ListBoxModel.Option("Build took more than"),
+                            new ListBoxModel.Option("Build took less than")
+                    );
+                }
+            }
+        }
+
+        public static class Script extends Condition {
+            private final String scriptText;
+            // TODO support groovy and windows thing
+            private final String language;
+            @DataBoundConstructor public Script(String scriptText) {
+                super("Script");
+                this.scriptText = scriptText;
+                this.language = "BASH";
+            }
+
+            public String getScriptText() {
+                return scriptText;
+            }
+
+            public String getLanguage() {
+                return language;
+            }
+
+            @Extension
+            @Symbol("Script")
+            public static final class DescriptorImpl extends ConditionDescriptor {
+                @NonNull
+                @Override
+                public String getDisplayName() {
+                    return "Script output";
                 }
             }
         }
