@@ -4,6 +4,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.slaves.OfflineCause;
+import hudson.util.RunList;
 import io.jenkins.plugins.agentManager.ScriptRunner.BashScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.BatchScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.ScriptRunner;
@@ -55,6 +56,25 @@ public class ActionRunner {
         return runner.evaluateCondition(launcher, listener, script);
     }
 
+    private static boolean conditionHistory(ActionInstance.Condition.History history, TaskListener listener, Launcher launcher) {
+        Computer computer = Computer.currentComputer();
+        RunList<? extends Run<?, ?>> runList = computer.getBuilds();
+        int quantity = history.getQuantity();
+
+        System.out.println(quantity);
+        System.out.println(history.getHistoryCondition());
+        System.out.println("Entering cycle");
+        for (int i = 0; i < quantity; i++) {
+            // If there is not enough runs to evaluate condition, pass the condition
+            if (!runList.iterator().hasNext())
+                return true;
+
+            Run run = runList.iterator().next();
+        }
+
+        return false;
+    }
+
     private static List <ActionInstance> filterScriptsByCondition(Run<?,?> run, TaskListener listener,  Launcher launcher, List <ActionInstance> list) {
         List <ActionInstance> filtered = new ArrayList<>();
         for (ActionInstance action : list) {
@@ -70,6 +90,10 @@ public class ActionRunner {
                     break;
                 case "Script":
                     if (conditionScript((ActionInstance.Condition.Script) condition, listener, launcher))
+                        filtered.add(action);
+                    break;
+                case "History":
+                    if (conditionHistory((ActionInstance.Condition.History) condition, listener, launcher))
                         filtered.add(action);
                     break;
                 default:

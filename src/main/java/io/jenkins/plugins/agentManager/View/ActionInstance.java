@@ -166,7 +166,8 @@ public class ActionInstance extends NodeProperty<Node> {
             return new ListBoxModel(
                     new ListBoxModel.Option("Everytime"),
                     new ListBoxModel.Option("Duration"),
-                    new ListBoxModel.Option("Script")
+                    new ListBoxModel.Option("Script"),
+                    new ListBoxModel.Option("History")
             );
         }
 
@@ -222,12 +223,9 @@ public class ActionInstance extends NodeProperty<Node> {
                 return unit;
             }
 
-            @DataBoundConstructor public Duration(String durationCondition, long time, String unit) {
+            @DataBoundConstructor
+            public Duration(String durationCondition, long time, String unit) {
                 super("Duration");
-                System.out.println("Duration");
-                System.out.println(durationCondition);
-                System.out.println(time);
-                System.out.println(unit);
                 this.durationCondition = durationCondition;
                 this.time = time;
                 this.unit = unit;
@@ -254,6 +252,43 @@ public class ActionInstance extends NodeProperty<Node> {
                     return new ListBoxModel(
                             new ListBoxModel.Option("Build took more than"),
                             new ListBoxModel.Option("Build took less than")
+                    );
+                }
+            }
+        }
+
+        public static class History extends Condition {
+            private final String historyCondition;
+            private final int quantity;
+
+            public String getHistoryCondition() {
+                return historyCondition;
+            }
+
+            public int getQuantity() {
+                return quantity;
+            }
+
+            @DataBoundConstructor
+            public History(String historyCondition, int quantity) {
+                super("History");
+                this.historyCondition = historyCondition;
+                this.quantity = quantity;
+            }
+
+            @Extension
+            @Symbol("History")
+            public static final class DescriptorImpl extends ConditionDescriptor {
+                @NonNull
+                @Override
+                public String getDisplayName() {
+                    return "Based on build history";
+                }
+
+                public ListBoxModel doFillHistoryConditionItems() {
+                    return new ListBoxModel(
+                            new ListBoxModel.Option("Builds keep failing"),
+                            new ListBoxModel.Option("Builds end too fast")
                     );
                 }
             }
