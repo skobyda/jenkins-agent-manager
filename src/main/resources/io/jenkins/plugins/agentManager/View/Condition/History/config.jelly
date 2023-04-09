@@ -3,7 +3,8 @@
     <f:entry field="quantity" title="How many previous build to evalute">
         <f:number name="quantity" value="${instance.quantity}"/>
     </f:entry>
-    <f:entry field="historyCondition" title="Build History condition">
+    <f:entry field="historyCondition" title="Check if previous build">
         <f:select />
-    </f:entry>
+   </f:entry>
+
 </j:jelly>

@@ -41,7 +41,7 @@ public class ActionNodeProperty extends NodeProperty<Node> {
 
         @Override
         public String getDisplayName() {
-            return "Action management";
+            return "Configure build actions";
         }
     }
 }
