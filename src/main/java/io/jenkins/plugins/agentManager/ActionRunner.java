@@ -8,10 +8,7 @@ import hudson.util.RunList;
 import io.jenkins.plugins.agentManager.ScriptRunner.BashScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.BatchScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.ScriptRunner;
-import io.jenkins.plugins.agentManager.View.ActionInstance;
-import io.jenkins.plugins.agentManager.View.ActionNodeProperty;
-import io.jenkins.plugins.agentManager.View.Condition;
-import io.jenkins.plugins.agentManager.View.Trigger;
+import io.jenkins.plugins.agentManager.View.*;
 import io.jenkins.plugins.agentManager.View.Action;
 import org.jvnet.localizer.ResourceBundleHolder;
 
@@ -109,9 +106,9 @@ public class ActionRunner {
         return filtered;
     }
 
-    private static List <ActionInstance> filterScriptsByTrigger(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
+    private static List <ActionInstance> filterActionsByClass(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
         if (isPreBuild) {
-            return getActionsMatchingTriggers("Before", listener);
+            return getActionsByType(preBuildAction.class, listener);
         }
 
         Result result = run.getResult();
@@ -121,16 +118,16 @@ public class ActionRunner {
         // result is only set after all post-build actions have run, as post-build actions also may fail
         // so the result == null means that build has not encountered any error yet
         // if (result == null) {
-        //     return getScriptsMatchingTriggers("SUCCESS", listener);
+        //     return getScriptsByType("SUCCESS", listener);
         // }
 
         // Mentioned above doesn't fit anymore. That used to work only if we extend BuildWrapper or BuildStep. Extending BuildListener we have a meaningful output
         if (result == Result.SUCCESS) {
-            return getActionsMatchingTriggers("Success", listener);
+            return getActionsByType(postSuccessBuildAction.class, listener);
         }
 
         if (result == Result.FAILURE) {
-            return getActionsMatchingTriggers("Failure", listener);
+            return getActionsByType(postFailedBuildAction.class, listener);
         }
 
         // TODO
@@ -138,25 +135,23 @@ public class ActionRunner {
         return new ArrayList<>();
     }
 
-    private static List <ActionInstance> getRelevantScripts(Run<?,?> run, TaskListener listener, Launcher launcher, Boolean isPreBuild) {
-        List <ActionInstance> filteredList = filterScriptsByTrigger(run, listener, isPreBuild);
+    private static List <ActionInstance> getRelevantActions(Run<?,?> run, TaskListener listener, Launcher launcher, Boolean isPreBuild) {
+        List <ActionInstance> filteredList = filterActionsByClass(run, listener, isPreBuild);
 
         return filterScriptsByCondition(run, listener, launcher, filteredList);
     }
 
-    private static List <ActionInstance> getActionsMatchingTriggers(String trigger, TaskListener listener) {
-        listener.getLogger().println(trigger);
+    private static List <ActionInstance> getActionsByType(Class matchingClass, TaskListener listener) {
+        listener.getLogger().println(matchingClass);
         listener.getLogger().println("HERE");
 
         List <ActionInstance> filtered = new ArrayList<>();
         List <ActionInstance> actions = getAllNodeActions();
 
         for (ActionInstance action : actions) {
-            Trigger actionTrigger = action.getTrigger();
-
             listener.getLogger().println("HELLO");
-            listener.getLogger().println(actionTrigger.getName());
-            if (trigger.equals(actionTrigger.getName())) {
+            listener.getLogger().println(action.getClass());
+            if (action.getClass().equals(matchingClass)) {
                 filtered.add(action);
             }
         }
@@ -167,14 +162,14 @@ public class ActionRunner {
 
     private static List <ActionInstance> getAllNodeActions() {
         Node node = Computer.currentComputer().getNode();
-        ActionNodeProperty actionNodeProperty = node.getNodeProperties().get(ActionNodeProperty.class);
+        Config actionNodeProperty = node.getNodeProperties().get(Config.class);
         // TODO null handling
         // TODO, test also on project which do not have node assigned for computer which doesn't have agentManager setups
-        return actionNodeProperty.getActionInstances();
+        return actionNodeProperty.getEntries();
     }
 
     public static void act(Launcher launcher, TaskListener listener, Run<?,?> run, FilePath workspace, Boolean isPreBuild) {
-        List <ActionInstance> actions = getRelevantScripts(run, listener, launcher, isPreBuild);
+        List <ActionInstance> actions = getRelevantActions(run, listener, launcher, isPreBuild);
         listener.getLogger().println("RELEVANT SCRIPTS");
         listener.getLogger().println(actions);
 
