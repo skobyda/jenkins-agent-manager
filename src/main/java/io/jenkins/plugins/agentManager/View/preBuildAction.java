@@ -2,6 +2,7 @@ package io.jenkins.plugins.agentManager.View;
 
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
+import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;

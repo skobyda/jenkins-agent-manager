@@ -3,6 +3,8 @@ package io.jenkins.plugins.agentManager;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
+import hudson.node_monitors.DiskSpaceMonitor;
+import hudson.node_monitors.DiskSpaceMonitorDescriptor;
 import hudson.slaves.OfflineCause;
 import hudson.util.RunList;
 import io.jenkins.plugins.agentManager.ScriptRunner.BashScriptRunner;
@@ -41,6 +43,26 @@ public class ActionRunner {
             returnVal = buildDuration < expectedDurationInMilliseconds;
 
         return returnVal;
+    }
+
+    private static boolean conditionDiskSpace(Condition.DiskSpace diskSpace, TaskListener listener, Launcher launcher) {
+        listener.getLogger().println(diskSpace.getSpace());
+        listener.getLogger().println(diskSpace.getUnit());
+        String unit = diskSpace.getUnit();
+        long thresholdSpaceMB;
+
+        if (unit.equals("GB"))
+            thresholdSpaceMB = diskSpace.getSpace() * 1024; // make it MB
+        else
+            thresholdSpaceMB = diskSpace.getSpace();
+
+       // Move to some upper function and share this variable
+       Computer computer = Computer.currentComputer();
+       DiskSpaceMonitor diskSpaceMonitor = ComputerSet.getMonitors().get(DiskSpaceMonitor.class);
+       DiskSpaceMonitorDescriptor.DiskSpace freeSpace = diskSpaceMonitor.getFreeSpace(computer);
+       long availableSpaceInMB = freeSpace.getFreeSize() * 1024 * 1024;
+
+       return thresholdSpaceMB <= availableSpaceInMB;
     }
 
     private static boolean conditionScript(Condition.Script script, TaskListener listener, Launcher launcher) {
@@ -90,6 +112,10 @@ public class ActionRunner {
                     break;
                 case "Script":
                     if (conditionScript((Condition.Script) condition, listener, launcher))
+                        filtered.add(action);
+                    break;
+                case "DiskSpace":
+                    if (conditionDiskSpace((Condition.DiskSpace) condition, listener, launcher))
                         filtered.add(action);
                     break;
                 case "History":
