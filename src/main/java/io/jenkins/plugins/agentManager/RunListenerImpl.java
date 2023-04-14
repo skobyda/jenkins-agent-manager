@@ -88,7 +88,7 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
         listener.getLogger().println("setUpEnvironment");
         listener.getLogger().println(this.workspace);
 
-        ActionRunner.act(this.launcher, listener, run, workspace, true);
+        ActionRunner.actPreBuild(this.launcher, listener, run, workspace);
 
         return new Environment() {};
     }
@@ -101,6 +101,6 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
 
         listener.getLogger().println(run.getResult().toString());
 
-        ActionRunner.act(this.launcher, listener, run, workspace, false);
+        ActionRunner.actPostBuild(this.launcher, listener, run, workspace);
     }
 }

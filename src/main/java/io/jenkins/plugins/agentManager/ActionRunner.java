@@ -14,6 +14,7 @@ import io.jenkins.plugins.agentManager.View.*;
 import io.jenkins.plugins.agentManager.View.Action;
 import org.jvnet.localizer.ResourceBundleHolder;
 
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -194,11 +195,43 @@ public class ActionRunner {
         return actionNodeProperty.getEntries();
     }
 
-    public static void act(Launcher launcher, TaskListener listener, Run<?,?> run, FilePath workspace, Boolean isPreBuild) {
-        List <ActionInstance> actions = getRelevantActions(run, listener, launcher, isPreBuild);
+    public static void actPreBuild(Launcher launcher, TaskListener listener, AbstractBuild run, FilePath workspace) {
+        List <ActionInstance> actions = getRelevantActions(run, listener, launcher, true);
+
         listener.getLogger().println("RELEVANT SCRIPTS");
         listener.getLogger().println(actions);
+        for (ActionInstance action : actions) {
+            listener.getLogger().println("Acting upon action");
+            listener.getLogger().println(action);
+            // TODO runScript should be a property of script?
+            switch(action.getAction().getName()) {
+                case "CustomScript":
+                    runScript(launcher, listener, (Action.CustomScript) action.getAction());
+                    break;
+                case "Cleanup":
+                    cleanup(launcher, listener, run, workspace);
+                    break;
+                case "StopBuild":
+                    stopBuild(listener, run);
+                    break;
+                case "Reboot":
+                    // throw?
+                    break;
+                case "SetOffline":
+                    setOffline(listener, run);
+                    break;
+                default:
+                    // TODO fix error handling
+                    throw new IllegalArgumentException("Invalid action: " + action.getAction().getName());
+            }
+        }
+    }
 
+    public static void actPostBuild(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
+        List <ActionInstance> actions = getRelevantActions(run, listener, launcher, false);
+
+        listener.getLogger().println("RELEVANT SCRIPTS");
+        listener.getLogger().println(actions);
         for (ActionInstance action : actions) {
             listener.getLogger().println("Acting upon action");
             listener.getLogger().println(action);
@@ -236,6 +269,17 @@ public class ActionRunner {
         listener.getLogger().println(runner);
 
         runner.run(launcher, listener, script);
+    }
+
+    private static void stopBuild(TaskListener listener, AbstractBuild run) {
+        // TODO
+        try {
+            run.doStop();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ServletException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void getRunTime(TaskListener listener, Run run) {

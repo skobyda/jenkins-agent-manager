@@ -40,6 +40,22 @@ public abstract class Action implements ExtensionPoint, Describable<Action> {
         }
     }
 
+    public static class StopBuild extends Action {
+        @DataBoundConstructor public StopBuild() {
+            super("StopBuild");
+        }
+
+        @Extension
+        @Symbol("StopBuild")
+        public static final class DescriptorImpl extends ActionDescriptor {
+            @NonNull
+            @Override
+            public String getDisplayName() {
+                return "Stop build";
+            }
+        }
+    }
+
     public static class Reboot extends Action {
         @DataBoundConstructor public Reboot() {
             super("Reboot");
