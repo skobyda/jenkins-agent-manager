@@ -72,6 +72,22 @@ public abstract class Action implements ExtensionPoint, Describable<Action> {
         }
     }
 
+    public static class GracefulReboot extends Action {
+        @DataBoundConstructor public GracefulReboot() {
+            super("GracefulReboot");
+        }
+
+        @Extension
+        @Symbol("GracefulReboot")
+        public static final class DescriptorImpl extends ActionDescriptor {
+            @NonNull
+            @Override
+            public String getDisplayName() {
+                return "Gracefully reboot agent";
+            }
+        }
+    }
+
     public static class SetOffline extends Action {
         @DataBoundConstructor public SetOffline() {
             super("SetOffline");

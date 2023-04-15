@@ -6,7 +6,7 @@ import io.jenkins.plugins.agentManager.View.Action;
 import io.jenkins.plugins.agentManager.View.Condition;
 
 public class BatchScriptRunner extends ScriptRunner {
-    public void run(Launcher launcher, TaskListener listener, Action.CustomScript script) {
+    public void run(Launcher launcher, TaskListener listener, String script) {
         // noop
     }
 

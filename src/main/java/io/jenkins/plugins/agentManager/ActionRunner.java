@@ -215,7 +215,12 @@ public class ActionRunner {
                     stopBuild(listener, run);
                     break;
                 case "Reboot":
-                    // throw?
+                    // TODO doesn't make sense as prebuild action
+                    reboot(launcher, listener);
+                    break;
+                case "GracefulReboot":
+                    // TODO doesn't make sense as prebuild action
+                    gracefulReboot(launcher, listener, run);
                     break;
                 case "SetOffline":
                     setOffline(listener, run);
@@ -246,6 +251,10 @@ public class ActionRunner {
                 case "Reboot":
                     // reboot(launcher, listener, run, workspace);
                     break;
+                case "GracefulReboot":
+                    // TODO doesn't make sense as prebuild action
+                    // gracefulReboot(launcher, listener, (AbstractBuild)run);
+                    break;
                 case "SetOffline":
                     setOffline(listener, run);
                     break;
@@ -258,7 +267,7 @@ public class ActionRunner {
 
     private static void runScript(Launcher launcher, TaskListener listener, Action.CustomScript script) {
         // TODO
-        // Use factory here
+        // Use factory here ?
         ScriptRunner runner = null;
         listener.getLogger().println(script.getScriptText());
         if ("BASH".equals(script.getLanguage())) {
@@ -268,7 +277,45 @@ public class ActionRunner {
         }
         listener.getLogger().println(runner);
 
-        runner.run(launcher, listener, script);
+        String scriptContent = script.getScriptText();
+        runner.run(launcher, listener, scriptContent);
+    }
+
+    private static void gracefulReboot(Launcher launcher, TaskListener listener, AbstractBuild run) {
+        setOffline(listener, run);
+
+        // Wait for all builds on computer to finish
+        Computer computer = Computer.currentComputer();
+        // TODO prevent infinite time
+        // TODO allow user to specify timeout for which it will wait for builds to finish
+        for (Object object : computer.getBuilds()) {
+            Run build = (Run) object;
+            while (build.isBuilding()) {
+                try {
+                    long estimatedRemaining = build.getExecutor().getEstimatedRemainingTimeMillis();
+                    Thread.sleep(estimatedRemaining);
+                } catch (InterruptedException e) {
+                    // TODO
+                }
+            }
+        }
+
+        reboot(launcher, listener);
+    }
+
+    private static void reboot(Launcher launcher, TaskListener listener) {
+        // TODO batch
+        ScriptRunner runner = new BashScriptRunner();
+
+        Computer computer = Computer.currentComputer();
+        String scriptContent;
+
+        if (computer.isUnix())
+            scriptContent = "shutdown -r now";
+        else
+            scriptContent = "shutdown -r -f -t 0";
+
+        runner.run(launcher, listener, scriptContent);
     }
 
     private static void stopBuild(TaskListener listener, AbstractBuild run) {
@@ -329,6 +376,7 @@ public class ActionRunner {
             computer.connect(false);
         }
 
+        // TODO graceful reboot
         // One way to achieve reboot is to call getBuilds() for computer, then get estimated time for finish for each build, and wait in cycle for builds to finish
         // Once all the builds finish, we can do a graceful reboot
     } */

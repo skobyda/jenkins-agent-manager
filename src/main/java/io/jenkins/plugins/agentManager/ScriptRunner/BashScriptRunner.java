@@ -31,11 +31,9 @@ public class BashScriptRunner extends ScriptRunner {
         return launcher.launch().cmds(parsedScript).stdout(listener).join();
     }
 
-    public void run(Launcher launcher, TaskListener listener, Action.CustomScript script) {
-        String scriptContent = script.getScriptText();
-
+    public void run(Launcher launcher, TaskListener listener, String script) {
         try {
-            executeScript(launcher, listener, scriptContent);
+            executeScript(launcher, listener, script);
         } catch (IOException e) {
             // TODO e.printStackTrace(listener.fatalError());
             throw new RuntimeException(e);
