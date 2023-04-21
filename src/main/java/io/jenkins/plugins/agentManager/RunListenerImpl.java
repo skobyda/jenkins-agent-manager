@@ -65,14 +65,19 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
+import jenkins.util.Timer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import javax.swing.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 @Extension
 public class RunListenerImpl extends RunListener<Run<?, ?>> {
     Launcher launcher;
     FilePath workspace;
+    ScheduledExecutorService executorService;
 
     @DataBoundConstructor
     public RunListenerImpl() {
@@ -81,6 +86,14 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
 
     @Override
     public Environment setUpEnvironment(AbstractBuild run, Launcher launcher, BuildListener listener) {
+        // TODO should action run if build has a parent
+        // Some projects run builds in form of tree
+        // Run setup actions only on root
+        // AbstractBuild rootBuild = rootBuild.getRootBuild();
+        //
+        // if (rootBuild != null)
+        //    return null;
+
         // TODO
         // Research if saving launcher and keeping it alive is not incorrect
         this.launcher = launcher;
@@ -95,12 +108,30 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
 
     @Override
     public void onCompleted(Run<?, ?> run, TaskListener listener) {
-        listener.getLogger().println("Running post-build executor");
+        listener.getLogger().println("onCompleted");
         AbstractBuild build = (AbstractBuild) run;
         listener.getLogger().println(build.getWorkspace());
 
         listener.getLogger().println(run.getResult().toString());
 
+        executorService.shutdown();
+
         ActionRunner.actPostBuild(this.launcher, listener, run, workspace);
+    }
+
+    @Override
+    public void onStarted(Run<?, ?> run, TaskListener listener) {
+        listener.getLogger().println("onStarted");
+        AbstractBuild build = (AbstractBuild) run;
+
+        this.executorService = Timer.get();
+
+        Runnable beeper = () -> System.out.println("beep");
+        executorService.scheduleAtFixedRate(beeper, 10, 10, TimeUnit.SECONDS);
+
+        // Maybe have a canceller so service doesn't get stuck in a loop forever
+        /* ScheduledFuture<?> handler = executorService.scheduleAtFixedRate(beeper, 10, 10, TimeUnit.SECONDS);
+        Runnable canceller = () -> beeperHandle.cancel(false);
+        scheduler.schedule(canceller, 1, HOURS); */
     }
 }
