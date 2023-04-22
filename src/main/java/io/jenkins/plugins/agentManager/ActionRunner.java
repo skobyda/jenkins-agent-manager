@@ -12,6 +12,11 @@ import io.jenkins.plugins.agentManager.ScriptRunner.BatchScriptRunner;
 import io.jenkins.plugins.agentManager.ScriptRunner.ScriptRunner;
 import io.jenkins.plugins.agentManager.View.*;
 import io.jenkins.plugins.agentManager.View.Action;
+import io.jenkins.plugins.agentManager.View.ActionInstance.CustomScript;
+import io.jenkins.plugins.agentManager.View.ConditionInstance.DiskSpace;
+import io.jenkins.plugins.agentManager.View.ConditionInstance.Duration;
+import io.jenkins.plugins.agentManager.View.ConditionInstance.History;
+import io.jenkins.plugins.agentManager.View.ConditionInstance.Script;
 import org.jvnet.localizer.ResourceBundleHolder;
 
 import javax.servlet.ServletException;
@@ -20,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActionRunner {
-    private static boolean conditionDuration(Condition.Duration duration, Run<?,?> run) {
+    private static boolean conditionDuration(Duration duration, Run<?,?> run) {
         long buildDuration = run.getDuration();
         String durationCondition = duration.getDurationCondition();
         String unit = duration.getUnit();
@@ -46,7 +51,7 @@ public class ActionRunner {
         return returnVal;
     }
 
-    private static boolean conditionDiskSpace(Condition.DiskSpace diskSpace, TaskListener listener, Launcher launcher) {
+    private static boolean conditionDiskSpace(DiskSpace diskSpace, TaskListener listener, Launcher launcher) {
         listener.getLogger().println(diskSpace.getSpace());
         listener.getLogger().println(diskSpace.getUnit());
         String unit = diskSpace.getUnit();
@@ -66,7 +71,7 @@ public class ActionRunner {
        return thresholdSpaceMB <= availableSpaceInMB;
     }
 
-    private static boolean conditionScript(Condition.Script script, TaskListener listener, Launcher launcher) {
+    private static boolean conditionScript(Script script, TaskListener listener, Launcher launcher) {
         ScriptRunner runner = null;
         listener.getLogger().println(script.getScriptText());
         if ("BASH".equals(script.getLanguage())) {
@@ -79,7 +84,7 @@ public class ActionRunner {
         return runner.evaluateCondition(launcher, listener, script);
     }
 
-    private static boolean conditionHistory(Condition.History history, TaskListener listener, Launcher launcher) {
+    private static boolean conditionHistory(History history, TaskListener listener, Launcher launcher) {
         Computer computer = Computer.currentComputer();
         RunList<? extends Run<?, ?>> runList = computer.getBuilds();
         int quantity = history.getQuantity();
@@ -98,9 +103,9 @@ public class ActionRunner {
         return false;
     }
 
-    private static List <ActionInstance> filterScriptsByCondition(Run<?,?> run, TaskListener listener,  Launcher launcher, List <ActionInstance> list) {
-        List <ActionInstance> filtered = new ArrayList<>();
-        for (ActionInstance action : list) {
+    private static List <BuildAction> filterScriptsByCondition(Run<?,?> run, TaskListener listener, Launcher launcher, List <BuildAction> list) {
+        List <BuildAction> filtered = new ArrayList<>();
+        for (BuildAction action : list) {
             Condition condition = action.getCondition();
 
             switch(condition.getName()) {
@@ -108,19 +113,19 @@ public class ActionRunner {
                     filtered.add(action);
                     break;
                 case "Duration":
-                    if (conditionDuration((Condition.Duration) condition, run))
+                    if (conditionDuration((Duration) condition, run))
                         filtered.add(action);
                     break;
                 case "Script":
-                    if (conditionScript((Condition.Script) condition, listener, launcher))
+                    if (conditionScript((Script) condition, listener, launcher))
                         filtered.add(action);
                     break;
                 case "DiskSpace":
-                    if (conditionDiskSpace((Condition.DiskSpace) condition, listener, launcher))
+                    if (conditionDiskSpace((DiskSpace) condition, listener, launcher))
                         filtered.add(action);
                     break;
                 case "History":
-                    if (conditionHistory((Condition.History) condition, listener, launcher))
+                    if (conditionHistory((History) condition, listener, launcher))
                         filtered.add(action);
                     break;
                 default:
@@ -133,7 +138,7 @@ public class ActionRunner {
         return filtered;
     }
 
-    private static List <ActionInstance> filterActionsByClass(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
+    private static List <BuildAction> filterActionsByClass(Run<?,?> run, TaskListener listener, Boolean isPreBuild) {
         if (isPreBuild) {
             return getActionsByType(preBuildAction.class, listener);
         }
@@ -162,20 +167,20 @@ public class ActionRunner {
         return new ArrayList<>();
     }
 
-    private static List <ActionInstance> getRelevantActions(Run<?,?> run, TaskListener listener, Launcher launcher, Boolean isPreBuild) {
-        List <ActionInstance> filteredList = filterActionsByClass(run, listener, isPreBuild);
+    private static List <BuildAction> getRelevantActions(Run<?,?> run, TaskListener listener, Launcher launcher, Boolean isPreBuild) {
+        List <BuildAction> filteredList = filterActionsByClass(run, listener, isPreBuild);
 
         return filterScriptsByCondition(run, listener, launcher, filteredList);
     }
 
-    private static List <ActionInstance> getActionsByType(Class matchingClass, TaskListener listener) {
+    private static List <BuildAction> getActionsByType(Class matchingClass, TaskListener listener) {
         listener.getLogger().println(matchingClass);
         listener.getLogger().println("HERE");
 
-        List <ActionInstance> filtered = new ArrayList<>();
-        List <ActionInstance> actions = getAllNodeActions();
+        List <BuildAction> filtered = new ArrayList<>();
+        List <BuildAction> actions = getAllNodeActions();
 
-        for (ActionInstance action : actions) {
+        for (BuildAction action : actions) {
             listener.getLogger().println("HELLO");
             listener.getLogger().println(action.getClass());
             if (action.getClass().equals(matchingClass)) {
@@ -187,7 +192,7 @@ public class ActionRunner {
         return filtered;
     }
 
-    private static List <ActionInstance> getAllNodeActions() {
+    private static List <BuildAction> getAllNodeActions() {
         Node node = Computer.currentComputer().getNode();
         Config actionNodeProperty = node.getNodeProperties().get(Config.class);
         // TODO null handling
@@ -196,17 +201,17 @@ public class ActionRunner {
     }
 
     public static void actPreBuild(Launcher launcher, TaskListener listener, AbstractBuild run, FilePath workspace) {
-        List <ActionInstance> actions = getRelevantActions(run, listener, launcher, true);
+        List <BuildAction> actions = getRelevantActions(run, listener, launcher, true);
 
         listener.getLogger().println("RELEVANT SCRIPTS");
         listener.getLogger().println(actions);
-        for (ActionInstance action : actions) {
+        for (BuildAction action : actions) {
             listener.getLogger().println("Acting upon action");
             listener.getLogger().println(action);
             // TODO runScript should be a property of script?
             switch(action.getAction().getName()) {
                 case "CustomScript":
-                    runScript(launcher, listener, (Action.CustomScript) action.getAction());
+                    runScript(launcher, listener, (CustomScript) action.getAction());
                     break;
                 case "Cleanup":
                     cleanup(launcher, listener, run, workspace);
@@ -233,17 +238,17 @@ public class ActionRunner {
     }
 
     public static void actPostBuild(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
-        List <ActionInstance> actions = getRelevantActions(run, listener, launcher, false);
+        List <BuildAction> actions = getRelevantActions(run, listener, launcher, false);
 
         listener.getLogger().println("RELEVANT SCRIPTS");
         listener.getLogger().println(actions);
-        for (ActionInstance action : actions) {
+        for (BuildAction action : actions) {
             listener.getLogger().println("Acting upon action");
             listener.getLogger().println(action);
             // TODO runScript should be a property of script?
             switch(action.getAction().getName()) {
                 case "CustomScript":
-                    runScript(launcher, listener, (Action.CustomScript) action.getAction());
+                    runScript(launcher, listener, (CustomScript) action.getAction());
                     break;
                 case "Cleanup":
                     cleanup(launcher, listener, run, workspace);
@@ -265,7 +270,7 @@ public class ActionRunner {
         }
     }
 
-    private static void runScript(Launcher launcher, TaskListener listener, Action.CustomScript script) {
+    private static void runScript(Launcher launcher, TaskListener listener, CustomScript script) {
         // TODO
         // Use factory here ?
         ScriptRunner runner = null;

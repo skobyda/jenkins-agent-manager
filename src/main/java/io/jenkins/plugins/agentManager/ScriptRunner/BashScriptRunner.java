@@ -2,8 +2,7 @@ package io.jenkins.plugins.agentManager.ScriptRunner;
 
 import hudson.Launcher;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.agentManager.View.Action;
-import io.jenkins.plugins.agentManager.View.Condition;
+import io.jenkins.plugins.agentManager.View.ConditionInstance.Script;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class BashScriptRunner extends ScriptRunner {
         }
     }
 
-    public boolean evaluateCondition(Launcher launcher, TaskListener listener, Condition.Script script) {
+    public boolean evaluateCondition(Launcher launcher, TaskListener listener, Script script) {
         String scriptContent = script.getScriptText();
         listener.getLogger().println(scriptContent);
 

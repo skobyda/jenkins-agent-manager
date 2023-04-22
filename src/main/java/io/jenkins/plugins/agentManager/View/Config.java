@@ -12,16 +12,16 @@ import java.util.List;
 
 public final class Config extends NodeProperty<Node> {
 
-    private final List<ActionInstance> entries;
+    private final List<BuildAction> entries;
 
-    @DataBoundConstructor public Config(List<ActionInstance> entries) {
-        this.entries = entries != null ? new ArrayList<ActionInstance>(entries) : Collections.<ActionInstance>emptyList();
+    @DataBoundConstructor public Config(List<BuildAction> entries) {
+        this.entries = entries != null ? new ArrayList<BuildAction>(entries) : Collections.<BuildAction>emptyList();
         System.out.println(entries);
         System.out.println("Config");
         System.out.println(entries.get(0) instanceof  postFailedBuildAction);
     }
 
-    public List<ActionInstance> getEntries() {
+    public List<BuildAction> getEntries() {
         return Collections.unmodifiableList(entries);
     }
 

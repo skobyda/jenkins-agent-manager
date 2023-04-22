@@ -8,7 +8,7 @@ import jenkins.model.Jenkins;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class postFailedBuildAction extends ActionInstance {
+public class postFailedBuildAction extends BuildAction {
     /**
      * Override locations. Never null.
      */
@@ -24,7 +24,7 @@ public class postFailedBuildAction extends ActionInstance {
 
     @Extension
     @Symbol("actionInstance")
-    public static class DescriptorImpl extends Descriptor<ActionInstance> {
+    public static class DescriptorImpl extends Descriptor<BuildAction> {
         @Override public String getDisplayName() {
             return "Action run after failed build";
         }

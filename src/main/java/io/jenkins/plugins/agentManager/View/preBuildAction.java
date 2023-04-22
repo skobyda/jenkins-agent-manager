@@ -2,14 +2,13 @@ package io.jenkins.plugins.agentManager.View;
 
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
-import hudson.model.AbstractDescribableImpl;
 import hudson.model.Descriptor;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class preBuildAction extends ActionInstance {
+public class preBuildAction extends BuildAction {
     /**
      * Override locations. Never null.
      */
@@ -25,7 +24,7 @@ public class preBuildAction extends ActionInstance {
 
     @Extension
     @Symbol("preBuildAction")
-    public static class DescriptorImpl extends Descriptor<ActionInstance> {
+    public static class DescriptorImpl extends Descriptor<BuildAction> {
         @Override public String getDisplayName() {
             return "Action run before build";
         }
