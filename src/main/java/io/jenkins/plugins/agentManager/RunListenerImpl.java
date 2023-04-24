@@ -116,7 +116,7 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
 
         executorService.shutdown();
 
-        ActionRunner.actPostBuild(this.launcher, listener, run, workspace);
+        ActionRunner.actPostBuild(this.launcher, listener, build, workspace);
     }
 
     @Override
