@@ -6,19 +6,19 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.springframework.lang.NonNull;
 
-public class Everytime extends io.jenkins.plugins.agentManager.View.Conditions.Everytime implements PreBuildCondition {
+public class NoCondition extends io.jenkins.plugins.agentManager.View.Conditions.NoCondition implements PreBuildCondition {
     @DataBoundConstructor
-    public Everytime() {
+    public NoCondition() {
         super();
     }
 
     @Extension
-    @Symbol("Everytime")
+    @Symbol("NoCondition")
     public static final class DescriptorImpl extends PreBuildConditionDescriptor {
         @NonNull
         @Override
         public String getDisplayName() {
-            return "Everytime";
+            return "No condition";
         }
     }
 }

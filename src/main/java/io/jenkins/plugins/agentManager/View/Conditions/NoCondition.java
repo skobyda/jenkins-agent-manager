@@ -5,13 +5,13 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import io.jenkins.plugins.agentManager.View.Condition;
 
-public abstract class Everytime implements Condition {
-    public Everytime() {
+public abstract class NoCondition implements Condition {
+    public NoCondition() {
     }
 
     @Override
     public String getName() {
-        return "Everytime";
+        return "NoCondition";
     }
 
     @Override
