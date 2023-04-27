@@ -26,40 +26,13 @@ public class ActionRunner {
         return filtered;
     }
 
-    private static List <BuildEntry> filterActionsByClass(AbstractBuild run, TaskListener listener, Boolean isPreBuild) {
+    private static List <BuildEntry> getActionsByPhase(AbstractBuild run, TaskListener listener, Launcher launcher, Boolean isPreBuild) {
+        List <BuildEntry> filteredList = getActionsByType(PostBuildEntry.class, listener);
         if (isPreBuild) {
             return getActionsByType(PreBuildEntry.class, listener);
         }
 
-        Result result = run.getResult();
-        listener.getLogger().println(result);
-        listener.getLogger().println(result.toString());
-
-        // result is only set after all post-build actions have run, as post-build actions also may fail
-        // so the result == null means that build has not encountered any error yet
-        // if (result == null) {
-        //     return getScriptsByType("SUCCESS", listener);
-        // }
-
-        // Mentioned above doesn't fit anymore. That used to work only if we extend BuildWrapper or BuildStep. Extending BuildListener we have a meaningful output
-        if (result == Result.SUCCESS) {
-            return getActionsByType(PostBuildEntry.class, listener);
-        }
-
-        // TODO difference based on result
-        if (result == Result.FAILURE) {
-            return getActionsByType(PostBuildEntry.class, listener);
-        }
-
-        // TODO
-        // result == Result.UNSTABLE or result == Result.ABRUPTED
-        return new ArrayList<>();
-    }
-
-    private static List <BuildEntry> getRelevantActions(AbstractBuild run, TaskListener listener, Launcher launcher, Boolean isPreBuild) {
-        List <BuildEntry> filteredList = filterActionsByClass(run, listener, isPreBuild);
-
-        listener.getLogger().println("getRelevantActions");
+        listener.getLogger().println("getActionsByPhase");
         listener.getLogger().println(filteredList);
 
         return filterScriptsByCondition(run, listener, launcher, filteredList);
@@ -94,7 +67,7 @@ public class ActionRunner {
 
     public static void actPreBuild(Launcher launcher, TaskListener listener, AbstractBuild run, FilePath workspace) {
         listener.getLogger().println("actPreBuild");
-        List <BuildEntry> entries = getRelevantActions(run, listener, launcher, true);
+        List <BuildEntry> entries = getActionsByPhase(run, listener, launcher, true);
         listener.getLogger().println(entries);
 
         for (BuildEntry entry : entries) {
@@ -112,7 +85,7 @@ public class ActionRunner {
 
     public static void actPostBuild(Launcher launcher, TaskListener listener, AbstractBuild run, FilePath workspace) {
         listener.getLogger().println("actPostBuild");
-        List <BuildEntry> entries = getRelevantActions(run, listener, launcher, false);
+        List <BuildEntry> entries = getActionsByPhase(run, listener, launcher, false);
         listener.getLogger().println(entries);
 
         for (BuildEntry entry : entries) {
