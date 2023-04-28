@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
+         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    <f:block>Hello</f:block>
+    <f:entry field="time" title="Timeout between triggers">
+        <f:number name="time" value="${instance.time}"/>
+    </f:entry>
+    <f:entry field="unit" title="Timeout unit">
+        <f:select />
+    </f:entry>
+    <f:entry field="loop" title="Conclude">
+        <f:booleanRadio field="loop" true="Loop forever" false="Stop once condition passes" />
+    </f:entry>
+    <f:dropdownDescriptorSelector field="duringBuildCondition" title="Condition" descriptors="${instance.duringBuildConditionDescriptor}" />
+    <f:dropdownDescriptorSelector field="duringBuildAction" title="Action" descriptors="${instance.duringBuildActionDescriptor}" />
+</j:jelly>
