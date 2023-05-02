@@ -68,10 +68,8 @@ import jenkins.util.Timer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 @Extension
 public class RunListenerImpl extends RunListener<Run<?, ?>> {

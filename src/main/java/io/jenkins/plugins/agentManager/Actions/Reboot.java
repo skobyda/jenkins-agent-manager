@@ -4,8 +4,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.Computer;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.agentManager.Utils.ScriptRunner.BashScriptRunner;
-import io.jenkins.plugins.agentManager.Utils.ScriptRunner.ScriptRunner;
+import io.jenkins.plugins.agentManager.Utils.ScriptRunner;
 
 public abstract class Reboot implements Action {
     @Override
@@ -15,7 +14,7 @@ public abstract class Reboot implements Action {
 
     public void runAction(TaskListener listener, Launcher launcher, AbstractBuild run, Computer computer) {
         // TODO batch
-        ScriptRunner runner = new BashScriptRunner();
+        ScriptRunner runner = new ScriptRunner();
 
         String scriptContent;
 

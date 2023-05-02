@@ -4,9 +4,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.Computer;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.agentManager.Utils.ScriptRunner.BashScriptRunner;
-import io.jenkins.plugins.agentManager.Utils.ScriptRunner.BatchScriptRunner;
-import io.jenkins.plugins.agentManager.Utils.ScriptRunner.ScriptRunner;
+import io.jenkins.plugins.agentManager.Utils.ScriptRunner;
 
 public abstract class CustomScript implements Action {
     private final String scriptText;
@@ -32,15 +30,8 @@ public abstract class CustomScript implements Action {
     }
 
     public void runAction(TaskListener listener, Launcher launcher, AbstractBuild run, Computer computer) {
-        // TODO
-        // Use factory here ?
-        ScriptRunner runner = null;
         listener.getLogger().println(getScriptText());
-        if ("BASH".equals(getLanguage())) {
-            runner = new BashScriptRunner();
-        } else if ("GROOVY".equals(getLanguage())) {
-            runner = new BatchScriptRunner();
-        }
+        ScriptRunner runner = new ScriptRunner();
         listener.getLogger().println(runner);
 
         String scriptContent = getScriptText();

@@ -3,9 +3,7 @@ package io.jenkins.plugins.agentManager.Conditions;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.agentManager.Utils.ScriptRunner.BashScriptRunner;
-import io.jenkins.plugins.agentManager.Utils.ScriptRunner.BatchScriptRunner;
-import io.jenkins.plugins.agentManager.Utils.ScriptRunner.ScriptRunner;
+import io.jenkins.plugins.agentManager.Utils.ScriptRunner;
 
 public abstract class Script implements Condition {
     private final String scriptText;
@@ -31,14 +29,8 @@ public abstract class Script implements Condition {
 
     @Override
     public boolean conditionPasses(TaskListener listener, Launcher launcher, AbstractBuild run) {
-        ScriptRunner runner = null;
         listener.getLogger().println(getScriptText());
-        // TODO constant
-        if ("BASH".equals(getLanguage())) {
-            runner = new BashScriptRunner();
-        } else if ("GROOVY".equals(getLanguage())) {
-            runner = new BatchScriptRunner();
-        }
+        ScriptRunner runner = new ScriptRunner();
         listener.getLogger().println(runner);
 
         String scriptContent = getScriptText();
