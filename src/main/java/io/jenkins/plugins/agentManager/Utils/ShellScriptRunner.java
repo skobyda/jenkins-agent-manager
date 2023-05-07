@@ -5,7 +5,7 @@ import hudson.model.TaskListener;
 
 import java.io.IOException;
 
-public class ScriptRunner {
+public class ShellScriptRunner {
     public int executeScript(Launcher launcher, TaskListener listener, String scriptContent) throws IOException, InterruptedException {
         return launcher.launch().cmdAsSingleString(scriptContent).stdout(listener).join();
     }

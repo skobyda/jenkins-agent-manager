@@ -7,5 +7,5 @@ import hudson.model.TaskListener;
 public interface Condition {
     String getName();
 
-    boolean conditionPasses(TaskListener listener, Launcher launcher, AbstractBuild run);
+    boolean conditionPasses(TaskListener listener, Launcher launcher, AbstractBuild run) throws Exception;
 }

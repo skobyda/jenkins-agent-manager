@@ -4,14 +4,13 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.Computer;
 import hudson.model.TaskListener;
-import io.jenkins.plugins.agentManager.Utils.ScriptRunner;
+import io.jenkins.plugins.agentManager.Utils.ShellScriptRunner;
 
-public abstract class CustomScript implements Action {
+public abstract class ShellScript implements Action {
     private final String scriptText;
-    // TODO support groovy and windows thing
     private final String language;
 
-    public CustomScript(String scriptText) {
+    public ShellScript(String scriptText) {
         this.scriptText = scriptText;
         this.language = "BASH";
     }
@@ -30,9 +29,7 @@ public abstract class CustomScript implements Action {
     }
 
     public void runAction(TaskListener listener, Launcher launcher, AbstractBuild run, Computer computer) {
-        listener.getLogger().println(getScriptText());
-        ScriptRunner runner = new ScriptRunner();
-        listener.getLogger().println(runner);
+        ShellScriptRunner runner = new ShellScriptRunner();
 
         String scriptContent = getScriptText();
         runner.run(launcher, listener, scriptContent);

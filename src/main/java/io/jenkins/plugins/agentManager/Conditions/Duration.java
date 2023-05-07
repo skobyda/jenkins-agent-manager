@@ -25,8 +25,6 @@ public abstract class Duration implements Condition {
     }
 
     public Duration(String durationCondition, long time, String unit) {
-        System.out.println("Duration");
-        System.out.println(durationCondition);
         this.durationCondition = durationCondition;
         this.time = time;
         this.unit = unit;
@@ -51,9 +49,6 @@ public abstract class Duration implements Condition {
         else
             returnVal = buildDuration < expectedDurationInMilliseconds;
 
-        listener.getLogger().println("duration");
-        listener.getLogger().println(buildDuration);
-        listener.getLogger().println(expectedDurationInMilliseconds);
         return returnVal;
     }
 }

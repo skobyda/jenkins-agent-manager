@@ -32,9 +32,6 @@ public abstract class DiskSpace implements Condition {
 
     @Override
     public boolean conditionPasses(TaskListener listener, Launcher launcher, AbstractBuild run) {
-        listener.getLogger().println("DiskSpace");
-        listener.getLogger().println(getSpace());
-        listener.getLogger().println(getUnit());
         long thresholdSpaceMB;
         if (getUnit().equals("GB"))
             thresholdSpaceMB = getSpace() * 1024; // make it MB

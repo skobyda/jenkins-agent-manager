@@ -35,9 +35,6 @@ public abstract class History implements Condition {
         RunList<? extends Run<?, ?>> runList = computer.getBuilds();
         int quantity = getQuantity();
 
-        System.out.println("History");
-        System.out.println(quantity);
-        System.out.println(getHistoryCondition());
         // TODO fix this
         for (int i = 0; i < quantity; i++) {
             // If there is not enough runs to evaluate condition, pass the condition

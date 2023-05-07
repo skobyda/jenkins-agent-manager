@@ -33,4 +33,23 @@ public abstract class GracefulReboot implements Action {
 
         // Reboot.runAction(listener, launcher, run);
     }
+        /* private static void reboot(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
+            OfflineCause cause = new OfflineCause();
+
+            computer.disconnect(OfflineCause.UserCause);
+
+                Executable currentExecutable = computer.getExecutors().getCurrentExecutable();
+                if (currentExecutable != null) {
+                    QueueTaskFuture<?> future = currentExecutable.getOwnerTask().getFuture();
+                    if (future != null) {
+                        future.waitForCompletion(10, TimeUnit.SECONDS);
+                    }
+                }
+            }
+
+            // Reconnect the computer
+            if (computer != null) {
+                computer.connect(false);
+            }
+        } */
 }

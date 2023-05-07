@@ -6,8 +6,8 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.springframework.lang.NonNull;
 
-public class CustomScript extends io.jenkins.plugins.agentManager.Actions.CustomScript implements PreBuildAction {
-    @DataBoundConstructor public CustomScript(String scriptText) {
+public class ShellScript extends io.jenkins.plugins.agentManager.Actions.ShellScript implements PreBuildAction {
+    @DataBoundConstructor public ShellScript(String scriptText) {
         super(scriptText);
     }
 
@@ -17,7 +17,7 @@ public class CustomScript extends io.jenkins.plugins.agentManager.Actions.Custom
         @NonNull
         @Override
         public String getDisplayName() {
-            return "Run custom script";
+            return "Run custom shell script";
         }
     }
 }

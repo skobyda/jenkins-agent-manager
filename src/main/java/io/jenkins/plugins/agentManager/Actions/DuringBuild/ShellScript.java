@@ -6,18 +6,18 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.springframework.lang.NonNull;
 
-public class CustomScript extends io.jenkins.plugins.agentManager.Actions.CustomScript implements DuringBuildAction {
-    @DataBoundConstructor public CustomScript(String scriptText) {
+public class ShellScript extends io.jenkins.plugins.agentManager.Actions.ShellScript implements DuringBuildAction {
+    @DataBoundConstructor public ShellScript(String scriptText) {
         super(scriptText);
     }
 
     @Extension
-    @Symbol("CustomScript")
+    @Symbol("ShellScript")
     public static final class DescriptorImpl extends DuringBuildActionDescriptor {
         @NonNull
         @Override
         public String getDisplayName() {
-            return "Run custom script";
+            return "Run custom shell script";
         }
     }
 }

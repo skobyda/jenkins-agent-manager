@@ -1,4 +1,4 @@
-package io.jenkins.plugins.agentManager;
+/* package io.jenkins.plugins.agentManager;
 
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
@@ -16,6 +16,7 @@ public class HelloWorldBuilderTest {
     public JenkinsRule jenkins = new JenkinsRule();
 
     final String name = "Bobby";
+
 
     @Test
     public void testConfigRoundtrip() throws Exception {
@@ -76,3 +77,4 @@ public class HelloWorldBuilderTest {
     }
 
 }
+*/

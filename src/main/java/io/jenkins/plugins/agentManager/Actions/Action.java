@@ -8,5 +8,5 @@ import hudson.model.TaskListener;
 public interface Action {
     String getName();
 
-    void runAction(TaskListener listener, Launcher launcher, AbstractBuild run, Computer computer);
+    void runAction(TaskListener listener, Launcher launcher, AbstractBuild run, Computer computer) throws Exception;
 }

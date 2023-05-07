@@ -12,12 +12,6 @@ public abstract class Result implements Condition {
     private Boolean notBuilt;
 
     public Result(Boolean success, Boolean failure, Boolean aborted, Boolean unstable, Boolean notBuilt) {
-        System.out.println("Result");
-        System.out.println(success);
-        System.out.println(failure);
-        System.out.println(aborted);
-        System.out.println(unstable);
-        System.out.println(notBuilt);
         this.success = success;
         this.failure = failure;
         this.aborted = aborted;
@@ -73,8 +67,6 @@ public abstract class Result implements Condition {
     @Override
     public boolean conditionPasses(TaskListener listener, Launcher launcher, AbstractBuild run) {
         hudson.model.Result result = run.getResult();
-        listener.getLogger().println("RESULT");
-        listener.getLogger().println(result.toString());
 
         // result is only set after all post-build actions have run, as post-build actions also may fail
         // so the result == null means that build has not encountered any error yet

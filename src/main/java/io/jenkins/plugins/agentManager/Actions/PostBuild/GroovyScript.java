@@ -6,18 +6,18 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.springframework.lang.NonNull;
 
-public class CustomScript extends io.jenkins.plugins.agentManager.Actions.CustomScript implements PostBuildAction {
-    @DataBoundConstructor public CustomScript(String scriptText) {
+public class GroovyScript extends io.jenkins.plugins.agentManager.Actions.GroovyScript implements PostBuildAction {
+    @DataBoundConstructor public GroovyScript(String scriptText) {
         super(scriptText);
     }
 
     @Extension
-    @Symbol("CustomScript")
+    @Symbol("GroovyScript")
     public static final class DescriptorImpl extends PostBuildActionDescriptor {
         @NonNull
         @Override
         public String getDisplayName() {
-            return "Run custom script";
+            return "Run custom groovy script";
         }
     }
 }

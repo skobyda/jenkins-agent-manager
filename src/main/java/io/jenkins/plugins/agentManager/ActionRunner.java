@@ -3,7 +3,6 @@ package io.jenkins.plugins.agentManager;
 import hudson.Launcher;
 import hudson.model.*;
 import io.jenkins.plugins.agentManager.Actions.Action;
-import io.jenkins.plugins.agentManager.Actions.DuringBuildAction;
 import io.jenkins.plugins.agentManager.BuildEntries.BuildEntry;
 import io.jenkins.plugins.agentManager.BuildEntries.DuringBuildEntry;
 import io.jenkins.plugins.agentManager.BuildEntries.PostBuildEntry;
@@ -16,8 +15,10 @@ import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public class ActionRunner {
+    private static final Logger LOGGER = Logger.getLogger(RunListenerImpl.class.getName());
     private final Launcher launcher;
     private final TaskListener listener;
     private final AbstractBuild build;
@@ -33,8 +34,12 @@ public class ActionRunner {
         for (BuildEntry entry : entries) {
             Condition condition = entry.getCondition();
 
-            if (condition.conditionPasses(listener, launcher, build))
-                filtered.add(entry);
+            try {
+                if (condition.conditionPasses(listener, launcher, build))
+                    filtered.add(entry);
+            } catch (Exception e) {
+                LOGGER.severe(String.format("Failed to evaluate condition %s", condition.getName()));
+            }
         }
 
         // TODO we can get rid of filtering if entry had an "perform" method which runs an action when condition passes
@@ -66,8 +71,11 @@ public class ActionRunner {
         for (BuildEntry entry : entries) {
             Action action = entry.getAction();
 
-            // TODO error handling
-            action.runAction(listener, launcher, build, computer);
+            try {
+                action.runAction(listener, launcher, build, computer);
+            } catch (Exception e) {
+                LOGGER.severe(String.format("Failed to run action %s", action.getName()));
+            }
         }
     }
 
@@ -86,7 +94,7 @@ public class ActionRunner {
     }
 
     // Move this to a BuildEntry class
-    private void evaluateAndRun(DuringBuildEntry entry, ScheduledExecutorService executorService, Computer computer) {
+    private void evaluateAndRun(DuringBuildEntry entry, ScheduledExecutorService executorService, Computer computer) throws Exception {
         if (entry.getActionPerformed())
             return;
 
@@ -95,21 +103,22 @@ public class ActionRunner {
         if (condition.conditionPasses(listener, launcher, build)) {
             Action action = entry.getAction();
             // TODO wrap with try
-            // TODO pass computer here
             action.runAction(listener, launcher, build, computer);
 
             if (!entry.getLoop()) {
                 // There is no way for us to cancel the Scheduled task from here.
                 // So instead we set it so the action is not performed again
+                // Alternatively we can also throw exception:
+                // https://stackoverflow.com/questions/4909824/stop-a-periodic-task-from-within-the-task-itself-running-in-a-scheduledexecutors/4910682d
                 entry.setActionPerformed();
             }
         }
     }
 
-    public List<ScheduledFuture> actDuringBuild(ScheduledExecutorService executorService, Computer computer) {
+    public List<ScheduledFuture<?>> actDuringBuild(ScheduledExecutorService executorService, Computer computer) {
         List <BuildEntry> entries = getEntriesByType(DuringBuildEntry.class);
 
-        List <ScheduledFuture> futureList = new ArrayList<>();
+        List <ScheduledFuture<?>> futureList = new ArrayList<>();
         for (BuildEntry entry : entries) {
             DuringBuildEntry duringBuildEntry = (DuringBuildEntry) entry;
 
@@ -117,8 +126,14 @@ public class ActionRunner {
             String timeoutUnit = duringBuildEntry.getUnit();
             long timeoutInMillis = Time.convertToMilliseconds(timeout, timeoutUnit);
 
-            Runnable periodicAction = () -> evaluateAndRun(duringBuildEntry, executorService, computer);
-            ScheduledFuture future = executorService.scheduleAtFixedRate(periodicAction, 0, timeoutInMillis, TimeUnit.MILLISECONDS);
+            Runnable periodicAction = () -> {
+                try {
+                    evaluateAndRun(duringBuildEntry, executorService, computer);
+                } catch (Exception e) {
+                    LOGGER.severe(String.format("Failed to run action %s with a condition %s", duringBuildEntry.getAction().getName(), duringBuildEntry.getCondition().getName()));
+                }
+            };
+            ScheduledFuture<?> future = executorService.scheduleAtFixedRate(periodicAction, 0, timeoutInMillis, TimeUnit.MILLISECONDS);
             futureList.add(future);
         }
 
