@@ -16,8 +16,6 @@ public abstract class Cleanup implements Action {
     public void runAction(TaskListener listener, Launcher launcher, AbstractBuild run, Computer computer) {
         FilePath workspace = run.getWorkspace();
         AbstractBuild build = run;
-        listener.getLogger().println("Cleanup");
-        listener.getLogger().println(build.getWorkspace());
 
         try {
             workspace.deleteRecursive();

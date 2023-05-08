@@ -35,7 +35,7 @@ public class ActionRunner {
             Condition condition = entry.getCondition();
 
             try {
-                if (condition.conditionPasses(listener, launcher, build))
+                if (conditionPasses(condition))
                     filtered.add(entry);
             } catch (Exception e) {
                 LOGGER.severe(String.format("Failed to evaluate condition %s", condition.getName()));
@@ -67,15 +67,32 @@ public class ActionRunner {
         return actionNodeProperty.getEntries();
     }
 
+    private boolean conditionPasses(Condition condition) {
+        boolean ret = false;
+        try {
+            ret = condition.conditionPasses(listener, launcher, build);
+            LOGGER.info(String.format("Condition '%s' evaluated as %s", condition.getName(), ret));
+        } catch (Exception e) {
+            LOGGER.severe(String.format("Failed to evaluate condition '%s': %s", condition.getName(), e.toString()));
+        }
+
+        return ret;
+    }
+
+    private void runAction(Action action, Computer computer) {
+        try {
+            action.runAction(listener, launcher, build, computer);
+            LOGGER.info(String.format("Action '%s' finished successfully", action.getName()));
+        } catch (Exception e) {
+            LOGGER.severe(String.format("Failed to run action '%s': %s", action.getName(), e.toString()));
+        }
+    }
+
     private void act(List <BuildEntry> entries, Computer computer) {
         for (BuildEntry entry : entries) {
             Action action = entry.getAction();
 
-            try {
-                action.runAction(listener, launcher, build, computer);
-            } catch (Exception e) {
-                LOGGER.severe(String.format("Failed to run action %s", action.getName()));
-            }
+            runAction(action, computer);
         }
     }
 
@@ -100,18 +117,20 @@ public class ActionRunner {
 
         Condition condition = entry.getCondition();
         // TODO wrap with try
-        if (condition.conditionPasses(listener, launcher, build)) {
+        if (conditionPasses(condition)) {
             Action action = entry.getAction();
-            // TODO wrap with try
-            action.runAction(listener, launcher, build, computer);
+            runAction(action, computer);
 
             if (!entry.getLoop()) {
                 // There is no way for us to cancel the Scheduled task from here.
                 // So instead we set it so the action is not performed again
+                // TODO
                 // Alternatively we can also throw exception:
                 // https://stackoverflow.com/questions/4909824/stop-a-periodic-task-from-within-the-task-itself-running-in-a-scheduledexecutors/4910682d
                 entry.setActionPerformed();
             }
+
+            LOGGER.info(String.format("Performed action '%s' with condition '%s' during the build", action.getName(), condition.getName()));
         }
     }
 

@@ -26,14 +26,12 @@ public class DuringBuildEntry extends BuildEntry {
 
     @DataBoundConstructor
     public DuringBuildEntry(Long time, String unit, boolean loop, DuringBuildCondition duringBuildCondition, DuringBuildAction duringBuildAction) {
-        System.out.println("DurinBuildEntry");
         this.duringBuildCondition = duringBuildCondition;
         this.duringBuildAction = duringBuildAction;
         this.time =  time;
         this.unit = unit;
         this.loop = loop;
         this.actionPerformed = false;
-        System.out.println(loop);
     }
 
     @Extension

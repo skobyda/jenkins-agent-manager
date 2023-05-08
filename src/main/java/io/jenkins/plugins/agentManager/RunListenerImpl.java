@@ -25,13 +25,6 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
 
     @Override
     public Environment setUpEnvironment(AbstractBuild build, Launcher launcher, BuildListener listener) {
-        // TODO should action run if build has a parent
-        // Some projects run builds in form of tree
-        // Run setup actions only on root
-        // AbstractBuild rootBuild = rootBuild.getRootBuild();
-        //
-        // if (rootBuild != null)
-        //    return null;
         Computer currentComputer = Computer.currentComputer();
         if (currentComputer == null) {
             LOGGER.severe("No Computer found. Cannot proceed with post-build action");
@@ -39,6 +32,7 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
 
         ActionRunner actionRunner = new ActionRunner(launcher, listener, build);
         actionRunner.actPreBuild(currentComputer);
+        LOGGER.info("PreBuild actions completed");
 
         return new Environment() {};
     }
@@ -68,6 +62,7 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
         ActionRunner actionRunner = new ActionRunner(launcher, listener, build);
         LOGGER.info("Triggering post-build actions");
         actionRunner.actPostBuild(currentComputer);
+        LOGGER.info("Post-build actions completed");
     }
 
     @Override
