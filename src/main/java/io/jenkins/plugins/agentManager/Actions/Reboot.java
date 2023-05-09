@@ -4,6 +4,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.Computer;
 import hudson.model.TaskListener;
+import io.jenkins.plugins.agentManager.Utils.HelperActions;
 import io.jenkins.plugins.agentManager.Utils.ShellScriptRunner;
 
 public abstract class Reboot implements Action {
@@ -13,15 +14,8 @@ public abstract class Reboot implements Action {
     }
 
     public void runAction(TaskListener listener, Launcher launcher, AbstractBuild run, Computer computer) {
-        ShellScriptRunner runner = new ShellScriptRunner();
+        HelperActions.setAgentOffline(listener, launcher, run, computer);
 
-        String scriptContent;
-
-        if (computer.isUnix())
-            scriptContent = "shutdown -r now";
-        else
-            scriptContent = "shutdown -r -f -t 0";
-
-        runner.run(launcher, listener, scriptContent);
+        HelperActions.rebootAgent(listener, launcher, computer);
     }
 }

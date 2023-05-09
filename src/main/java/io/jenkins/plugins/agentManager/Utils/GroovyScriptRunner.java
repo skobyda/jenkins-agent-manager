@@ -13,9 +13,7 @@ public class GroovyScriptRunner {
 
     public void run(Launcher launcher, TaskListener listener, String script) {
         try {
-            System.out.println("HERE");
             String result = executeScript(launcher, listener, script);
-            System.out.println(result);
         } catch (IOException e) {
             // TODO e.printStackTrace(listener.fatalError());
             throw new RuntimeException(e);
@@ -29,7 +27,7 @@ public class GroovyScriptRunner {
         boolean condition = true;
         try {
             String result = executeScript(launcher, listener, scriptContent);
-            System.out.println(result);
+            // TODO
             if (result == "whatistheresultofeexcutegroovy")
                 condition = false;
         } catch (IOException e) {

@@ -1,25 +1,25 @@
-package io.jenkins.plugins.agentManager.Conditions.PostBuild;
+package io.jenkins.plugins.agentManager.Conditions.PreBuild;
 
 import hudson.Extension;
 import hudson.util.ListBoxModel;
-import io.jenkins.plugins.agentManager.Conditions.PostBuildCondition;
+import io.jenkins.plugins.agentManager.Conditions.PreBuildCondition;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.springframework.lang.NonNull;
 
-public class History extends io.jenkins.plugins.agentManager.Conditions.History implements PostBuildCondition {
+public class HistoryFailed extends io.jenkins.plugins.agentManager.Conditions.HistoryFailed implements PreBuildCondition {
     @DataBoundConstructor
-    public History(String historyCondition, int quantity) {
-        super(historyCondition, quantity);
+    public HistoryFailed(int quantity) {
+        super(quantity);
     }
 
     @Extension
     @Symbol("History")
-    public static final class DescriptorImpl extends PostBuildConditionDescriptor {
+    public static final class DescriptorImpl extends PreBuildConditionDescriptor {
         @NonNull
         @Override
         public String getDisplayName() {
-            return "Based on build history";
+            return "Previous builds failed";
         }
 
         public ListBoxModel doFillHistoryConditionItems() {

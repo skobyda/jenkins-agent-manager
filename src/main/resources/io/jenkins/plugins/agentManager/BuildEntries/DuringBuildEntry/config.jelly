@@ -2,7 +2,6 @@
 
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-    <f:block>Hello</f:block>
     <f:entry field="time" title="Timeout between triggers">
         <f:number name="time" value="${instance.time}"/>
     </f:entry>

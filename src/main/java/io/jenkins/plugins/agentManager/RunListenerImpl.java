@@ -39,6 +39,8 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
 
     @Override
     public void onCompleted(Run<?, ?> run, TaskListener listener) {
+        // TODO check https://github.com/jenkinsci/postbuild-task-plugin/blob/master/src/main/java/hudson/plugins/postbuildtask/PostbuildTask.java
+
         for (ScheduledFuture<?> future : futureList) {
             future.cancel(true);
         }

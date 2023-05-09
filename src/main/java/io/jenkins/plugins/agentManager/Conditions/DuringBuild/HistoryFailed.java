@@ -7,10 +7,10 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.springframework.lang.NonNull;
 
-public class History extends io.jenkins.plugins.agentManager.Conditions.History implements DuringBuildCondition {
+public class HistoryFailed extends io.jenkins.plugins.agentManager.Conditions.HistoryFailed implements DuringBuildCondition {
     @DataBoundConstructor
-    public History(String historyCondition, int quantity) {
-        super(historyCondition, quantity);
+    public HistoryFailed(int quantity) {
+        super(quantity);
     }
 
     @Extension
@@ -19,7 +19,7 @@ public class History extends io.jenkins.plugins.agentManager.Conditions.History 
         @NonNull
         @Override
         public String getDisplayName() {
-            return "Based on build history";
+            return "Previous builds failed";
         }
 
         public ListBoxModel doFillHistoryConditionItems() {

@@ -14,14 +14,7 @@ public abstract class StopBuild implements Action {
         return "StopBuild";
     }
 
-    public void runAction(TaskListener listener, Launcher launcher, AbstractBuild run, Computer computer) {
-        // TODO
-        try {
-            run.doStop();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ServletException e) {
-            throw new RuntimeException(e);
-        }
+    public void runAction(TaskListener listener, Launcher launcher, AbstractBuild build, Computer computer) throws ServletException, IOException {
+        build.doStop();
     }
 }

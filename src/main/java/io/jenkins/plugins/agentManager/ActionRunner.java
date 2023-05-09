@@ -11,6 +11,7 @@ import io.jenkins.plugins.agentManager.Conditions.Condition;
 import io.jenkins.plugins.agentManager.Utils.Time;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -62,8 +63,10 @@ public class ActionRunner {
     private List<BuildEntry> getAllNodeEntries() {
         Node node = Computer.currentComputer().getNode();
         NodePropertyImpl actionNodeProperty = node.getNodeProperties().get(NodePropertyImpl.class);
-        // TODO null handling
-        // TODO, test also on project which do not have node assigned for computer which doesn't have agentManager setups
+
+        if (actionNodeProperty == null)
+            return Arrays.asList();
+
         return actionNodeProperty.getEntries();
     }
 
@@ -116,7 +119,6 @@ public class ActionRunner {
             return;
 
         Condition condition = entry.getCondition();
-        // TODO wrap with try
         if (conditionPasses(condition)) {
             Action action = entry.getAction();
             runAction(action, computer);

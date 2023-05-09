@@ -7,10 +7,10 @@ import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.springframework.lang.NonNull;
 
-public class History extends io.jenkins.plugins.agentManager.Conditions.History implements PreBuildCondition {
+public class HistoryTime extends io.jenkins.plugins.agentManager.Conditions.HistoryTime implements PreBuildCondition {
     @DataBoundConstructor
-    public History(String historyCondition, int quantity) {
-        super(historyCondition, quantity);
+    public HistoryTime(int quantity, long averageTime) {
+        super(quantity, averageTime);
     }
 
     @Extension
@@ -19,14 +19,7 @@ public class History extends io.jenkins.plugins.agentManager.Conditions.History 
         @NonNull
         @Override
         public String getDisplayName() {
-            return "Based on build history";
-        }
-
-        public ListBoxModel doFillHistoryConditionItems() {
-            return new ListBoxModel(
-                    new ListBoxModel.Option("Keep failing"),
-                    new ListBoxModel.Option("Finish too fast")
-                    );
+            return "Previous builds finish faster than";
         }
     }
 }
