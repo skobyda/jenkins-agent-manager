@@ -20,7 +20,6 @@ public class PreBuildEntry extends BuildEntry {
 
     @DataBoundConstructor
     public PreBuildEntry(PreBuildCondition preBuildCondition, PreBuildAction preBuildAction) {
-        System.out.println("PreBuildActionInstance");
         this.preBuildCondition = preBuildCondition;
         this.preBuildAction = preBuildAction;
     }

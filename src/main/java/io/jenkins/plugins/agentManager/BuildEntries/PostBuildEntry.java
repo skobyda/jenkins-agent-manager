@@ -20,7 +20,6 @@ public class PostBuildEntry extends BuildEntry {
 
     @DataBoundConstructor
     public PostBuildEntry(PostBuildCondition postBuildCondition, PostBuildAction postBuildAction) {
-        System.out.println("PostBuildActionInstance");
         this.postBuildCondition = postBuildCondition;
         this.postBuildAction = postBuildAction;
     }

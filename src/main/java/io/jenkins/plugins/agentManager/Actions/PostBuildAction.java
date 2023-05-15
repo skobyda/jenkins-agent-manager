@@ -6,6 +6,10 @@ import hudson.model.Descriptor;
 import jenkins.model.Jenkins;
 
 public interface PostBuildAction extends ExtensionPoint, Describable<PostBuildAction>, Action {
+    /** Gets a descriptor only specific for the actions run after the build
+     *
+     * @return descriptor
+     */
     default Descriptor<PostBuildAction> getDescriptor() {
         return Jenkins.get().getDescriptor(getClass());
     }

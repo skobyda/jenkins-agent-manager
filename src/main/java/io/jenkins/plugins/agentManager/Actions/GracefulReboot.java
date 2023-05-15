@@ -4,7 +4,6 @@ import hudson.Launcher;
 import hudson.model.*;
 import io.jenkins.plugins.agentManager.Utils.HelperActions;
 
-import java.util.Objects;
 import java.util.logging.Logger;
 
 public abstract class GracefulReboot implements Action {
