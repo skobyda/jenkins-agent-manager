@@ -4,9 +4,10 @@ import hudson.model.FreeStyleProject;
 import hudson.model.Result;
 import hudson.slaves.DumbSlave;
 import hudson.tasks.Shell;
-import io.jenkins.plugins.agentManager.Actions.PostBuild.ShellScript;
+import io.jenkins.plugins.agentManager.Actions.PostBuild.ShellScriptPostBuild;
 import io.jenkins.plugins.agentManager.Actions.PostBuildAction;
 import io.jenkins.plugins.agentManager.BuildEntries.PostBuildEntry;
+import io.jenkins.plugins.agentManager.Conditions.PostBuild.ResultPostBuild;
 import io.jenkins.plugins.agentManager.Conditions.PostBuildCondition;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,9 +30,9 @@ public class ConditionResultTest {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
         // Expect build to succeed
-        PostBuildCondition condition = new io.jenkins.plugins.agentManager.Conditions.PostBuild.Result(true, false, false, false, false);
+        PostBuildCondition condition = new ResultPostBuild(true, false, false, false, false);
 
-        PostBuildAction action = new ShellScript("echo 'hello tests'");
+        PostBuildAction action = new ShellScriptPostBuild("echo 'hello tests'");
         PostBuildEntry entry = new PostBuildEntry(condition, action);
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(entry));
         FreeStyleProject freeStyleProject = TestHelper.setupProject(jenkinsRule, slave);
@@ -49,8 +50,8 @@ public class ConditionResultTest {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
         // Expect build to fail
-        PostBuildCondition condition = new io.jenkins.plugins.agentManager.Conditions.PostBuild.Result(false, true, false, false, false);
-        PostBuildAction action = new ShellScript("echo 'hello tests'");
+        PostBuildCondition condition = new ResultPostBuild(false, true, false, false, false);
+        PostBuildAction action = new ShellScriptPostBuild("echo 'hello tests'");
         PostBuildEntry entry = new PostBuildEntry(condition, action);
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(entry));
         FreeStyleProject freeStyleProject = TestHelper.setupProject(jenkinsRule, slave);

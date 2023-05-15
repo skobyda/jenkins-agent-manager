@@ -43,7 +43,6 @@ public class ActionRunner {
             }
         }
 
-        // TODO we can get rid of filtering if entry had an "perform" method which runs an action when condition passes
         return filtered;
     }
 
@@ -62,6 +61,7 @@ public class ActionRunner {
 
     private List<BuildEntry> getAllNodeEntries() {
         Node node = Computer.currentComputer().getNode();
+        assert node != null;
         NodePropertyImpl actionNodeProperty = node.getNodeProperties().get(NodePropertyImpl.class);
 
         if (actionNodeProperty == null)
@@ -126,7 +126,6 @@ public class ActionRunner {
             if (!entry.getLoop()) {
                 // There is no way for us to cancel the Scheduled task from here.
                 // So instead we set it so the action is not performed again
-                // TODO
                 // Alternatively we can also throw exception:
                 // https://stackoverflow.com/questions/4909824/stop-a-periodic-task-from-within-the-task-itself-running-in-a-scheduledexecutors/4910682d
                 entry.setActionPerformed();

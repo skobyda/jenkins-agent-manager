@@ -27,7 +27,6 @@ public class Time {
         else if (unit.equals(Time.getMinutesString()))
             return TimeUnit.MILLISECONDS.convert(time, TimeUnit.MINUTES);
         else
-            // TODO add exception or error message
             return 0;
 
     }

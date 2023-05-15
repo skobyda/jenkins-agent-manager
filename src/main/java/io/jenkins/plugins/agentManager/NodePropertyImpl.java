@@ -18,9 +18,6 @@ public final class NodePropertyImpl extends NodeProperty<Node> {
 
     @DataBoundConstructor public NodePropertyImpl(List<BuildEntry> entries) {
         this.entries = entries != null ? new ArrayList<BuildEntry>(entries) : Collections.<BuildEntry>emptyList();
-        System.out.println(entries);
-        System.out.println("Config");
-        System.out.println(entries.get(0) instanceof PostBuildEntry);
     }
 
     public List<BuildEntry> getEntries() {
@@ -32,9 +29,6 @@ public final class NodePropertyImpl extends NodeProperty<Node> {
         public boolean isApplicable(Class<? extends Node> nodeType) {
             return true;
         }
-
-        // TODO do a form validation
-        // TODO add a help
 
         @Override
         public String getDisplayName() {

@@ -6,6 +6,8 @@ import hudson.model.*;
 import hudson.model.listeners.RunListener;
 import jenkins.util.Timer;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,13 +41,10 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
 
     @Override
     public void onCompleted(Run<?, ?> run, TaskListener listener) {
-        // TODO check https://github.com/jenkinsci/postbuild-task-plugin/blob/master/src/main/java/hudson/plugins/postbuildtask/PostbuildTask.java
-
         for (ScheduledFuture<?> future : futureList) {
             future.cancel(true);
         }
 
-        // TODO inverstigate when this can be null, especially on pipeline
         Computer currentComputer = Computer.currentComputer();
         if (currentComputer == null) {
             LOGGER.severe("No Computer found. Cannot proceed with post-build action");
@@ -74,7 +73,10 @@ public class RunListenerImpl extends RunListener<Run<?, ?>> {
             LOGGER.severe("No Computer available. Cannot proceed with post-build action");
             return;
         }
-        Launcher launcher = currentComputer.getNode().createLauncher(listener);
+        Node node = currentComputer.getNode();
+        assert node != null;
+
+        Launcher launcher = node.createLauncher(listener);
         if (launcher == null) {
             LOGGER.severe("No launcher created. Cannot proceed with post-build action");
             return;

@@ -2,11 +2,11 @@ package io.jenkins.plugins.agentManager;
 
 import hudson.model.*;
 import hudson.slaves.DumbSlave;
-import io.jenkins.plugins.agentManager.Actions.PreBuild.SetOffline;
+import io.jenkins.plugins.agentManager.Actions.PreBuild.SetOfflinePreBuild;
 import io.jenkins.plugins.agentManager.Actions.PreBuildAction;
 import io.jenkins.plugins.agentManager.BuildEntries.BuildEntry;
 import io.jenkins.plugins.agentManager.BuildEntries.PreBuildEntry;
-import io.jenkins.plugins.agentManager.Conditions.PreBuild.NoCondition;
+import io.jenkins.plugins.agentManager.Conditions.PreBuild.NoConditionPreBuild;
 import io.jenkins.plugins.agentManager.Conditions.PreBuildCondition;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,8 +41,8 @@ public class PreBuildTest {
     public void testPreBuildEntries() throws Exception {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
-        PreBuildCondition preBuildCondition = new NoCondition();
-        PreBuildAction preBuildAction = new SetOffline();
+        PreBuildCondition preBuildCondition = new NoConditionPreBuild();
+        PreBuildAction preBuildAction = new SetOfflinePreBuild();
         PreBuildEntry preBuildEntry = new PreBuildEntry(preBuildCondition, preBuildAction);
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(preBuildEntry));
         FreeStyleProject freeStyleProject = TestHelper.setupProject(jenkinsRule, slave);

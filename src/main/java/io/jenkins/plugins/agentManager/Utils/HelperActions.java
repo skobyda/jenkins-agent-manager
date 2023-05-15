@@ -12,7 +12,7 @@ public class HelperActions {
 
         String scriptContent;
 
-        if (computer.isUnix())
+        if (Boolean.TRUE.equals(computer.isUnix()))
             scriptContent = "shutdown -r now";
         else
             scriptContent = "shutdown -r -f -t 0";
@@ -21,7 +21,6 @@ public class HelperActions {
     }
 
     public static void setAgentOffline(TaskListener listener, Launcher launcher, AbstractBuild build, Computer computer) {
-        ResourceBundleHolder holder = ResourceBundleHolder.get(Messages.class);
         int buildNumber = build.getNumber();
         String buildName = build.getFullDisplayName();
         String computerName = computer.getDisplayName();

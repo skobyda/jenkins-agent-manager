@@ -9,7 +9,6 @@ import io.jenkins.plugins.agentManager.Utils.ShellScriptRunner;
 
 public abstract class GroovyScript implements Action {
     private final String scriptText;
-    // TODO support groovy and windows thing
     private final String language;
 
     public GroovyScript(String scriptText) {
@@ -27,7 +26,7 @@ public abstract class GroovyScript implements Action {
 
     @Override
     public String getName() {
-        return "CustomScript";
+        return "GroovyScript";
     }
 
     public void runAction(TaskListener listener, Launcher launcher, AbstractBuild run, Computer computer) {

@@ -3,10 +3,10 @@ package io.jenkins.plugins.agentManager;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.slaves.DumbSlave;
-import io.jenkins.plugins.agentManager.Actions.PostBuild.ShellScript;
+import io.jenkins.plugins.agentManager.Actions.PostBuild.ShellScriptPostBuild;
 import io.jenkins.plugins.agentManager.Actions.PostBuildAction;
 import io.jenkins.plugins.agentManager.BuildEntries.PostBuildEntry;
-import io.jenkins.plugins.agentManager.Conditions.PostBuild.Duration;
+import io.jenkins.plugins.agentManager.Conditions.PostBuild.DurationPostBuild;
 import io.jenkins.plugins.agentManager.Conditions.PostBuildCondition;
 import io.jenkins.plugins.agentManager.Utils.Time;
 import org.junit.Rule;
@@ -29,8 +29,8 @@ public class ConditionDurationTest {
     public void testDurationPassed() throws Exception {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
-        PostBuildCondition condition = new Duration("Build took more than", 1, Time.getMillisecondsString());
-        PostBuildAction action = new ShellScript("echo 'hello tests'");
+        PostBuildCondition condition = new DurationPostBuild("Build took more than", 1, Time.getMillisecondsString());
+        PostBuildAction action = new ShellScriptPostBuild("echo 'hello tests'");
         PostBuildEntry entry = new PostBuildEntry(condition, action);
 
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(entry));
@@ -46,8 +46,8 @@ public class ConditionDurationTest {
     public void testDurationNotPassed() throws Exception {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
-        PostBuildCondition condition = new Duration("Build took less than", 1, Time.getMillisecondsString());
-        PostBuildAction action = new ShellScript("echo 'hello tests'");
+        PostBuildCondition condition = new DurationPostBuild("Build took less than", 1, Time.getMillisecondsString());
+        PostBuildAction action = new ShellScriptPostBuild("echo 'hello tests'");
         PostBuildEntry entry = new PostBuildEntry(condition, action);
 
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(entry));

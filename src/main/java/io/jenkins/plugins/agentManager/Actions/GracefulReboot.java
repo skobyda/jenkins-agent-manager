@@ -23,11 +23,14 @@ public abstract class GracefulReboot implements Action {
             Run run = (Run) object;
             while (run.isBuilding()) {
                 // Have 5 seconds as arbitrary default timeout
-                // TODO allow user to specify timeout for which it will wait for builds to finish
+                // TODO in the future allow user to specify timeout for which it will wait for builds to finish
                 long defaultTimeout = 5000;
                 try {
-                    long estimatedRemaining = Objects.requireNonNull(build.getExecutor()).getEstimatedRemainingTimeMillis();
-                    if (estimatedRemaining < 5000)
+                    Executor executor = build.getExecutor();
+                    assert executor != null;
+
+                    long estimatedRemaining = executor.getEstimatedRemainingTimeMillis();
+                    if (estimatedRemaining > 5000)
                         defaultTimeout = estimatedRemaining;
                 } catch(Exception e) {
                     LOGGER.info(String.format("Could not get estimated remaining time of build %s, defaulting to 5 seconds", run.getNumber()));
@@ -38,24 +41,4 @@ public abstract class GracefulReboot implements Action {
 
         HelperActions.rebootAgent(listener, launcher, computer);
     }
-    // TODO remove this
-        /* private static void reboot(Launcher launcher, TaskListener listener, Run run, FilePath workspace) {
-            OfflineCause cause = new OfflineCause();
-
-            computer.disconnect(OfflineCause.UserCause);
-
-                Executable currentExecutable = computer.getExecutors().getCurrentExecutable();
-                if (currentExecutable != null) {
-                    QueueTaskFuture<?> future = currentExecutable.getOwnerTask().getFuture();
-                    if (future != null) {
-                        future.waitForCompletion(10, TimeUnit.SECONDS);
-                    }
-                }
-            }
-
-            // Reconnect the computer
-            if (computer != null) {
-                computer.connect(false);
-            }
-        } */
 }

@@ -2,10 +2,10 @@ package io.jenkins.plugins.agentManager;
 
 import hudson.model.FreeStyleProject;
 import hudson.slaves.DumbSlave;
-import io.jenkins.plugins.agentManager.Actions.PostBuild.ShellScript;
+import io.jenkins.plugins.agentManager.Actions.PostBuild.ShellScriptPostBuild;
 import io.jenkins.plugins.agentManager.Actions.PostBuildAction;
 import io.jenkins.plugins.agentManager.BuildEntries.PostBuildEntry;
-import io.jenkins.plugins.agentManager.Conditions.PostBuild.Script;
+import io.jenkins.plugins.agentManager.Conditions.PostBuild.ScriptPostBuild;
 import io.jenkins.plugins.agentManager.Conditions.PostBuildCondition;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,8 +28,8 @@ public class ConditionScriptTest {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
         // Spawn script which will return zero value (thus pass). A simple echo script will do fine
-        PostBuildCondition condition = new Script("echo 'passing condition'");
-        PostBuildAction action = new ShellScript("echo 'hello tests'");
+        PostBuildCondition condition = new ScriptPostBuild("echo 'passing condition'");
+        PostBuildAction action = new ShellScriptPostBuild("echo 'hello tests'");
         PostBuildEntry entry = new PostBuildEntry(condition, action);
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(entry));
         FreeStyleProject freeStyleProject = TestHelper.setupProject(jenkinsRule, slave);
@@ -43,8 +43,8 @@ public class ConditionScriptTest {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
         // Spawn script which will return non-zero value (thus fail) A simple script "false" will do fine
-        PostBuildCondition condition = new Script("false");
-        PostBuildAction action = new ShellScript("echo 'hello tests'");
+        PostBuildCondition condition = new ScriptPostBuild("false");
+        PostBuildAction action = new ShellScriptPostBuild("echo 'hello tests'");
         PostBuildEntry entry = new PostBuildEntry(condition, action);
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(entry));
         FreeStyleProject freeStyleProject = TestHelper.setupProject(jenkinsRule, slave);
@@ -58,8 +58,8 @@ public class ConditionScriptTest {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
         // Spawn script which will return non-zero value (thus fail) A simple script "false" will do fine
-        PostBuildCondition condition = new Script("true;\ntrue;\nfalse");
-        PostBuildAction action = new ShellScript("echo 'hello tests'");
+        PostBuildCondition condition = new ScriptPostBuild("true;\ntrue;\nfalse");
+        PostBuildAction action = new ShellScriptPostBuild("echo 'hello tests'");
         PostBuildEntry entry = new PostBuildEntry(condition, action);
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(entry));
         FreeStyleProject freeStyleProject = TestHelper.setupProject(jenkinsRule, slave);

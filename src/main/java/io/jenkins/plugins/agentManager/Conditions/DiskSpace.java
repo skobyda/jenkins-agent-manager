@@ -42,7 +42,9 @@ public abstract class DiskSpace implements Condition {
         Computer computer = Computer.currentComputer();
         DiskSpaceMonitor diskSpaceMonitor = ComputerSet.getMonitors().get(DiskSpaceMonitor.class);
         DiskSpaceMonitorDescriptor.DiskSpace freeSpace = diskSpaceMonitor.getFreeSpace(computer);
-        long availableSpaceInMB = freeSpace.getFreeSize() * 1024 * 1024;
+        String availableSpaceInGB = freeSpace.getGbLeft();
+        Float availableSpaceInGBFloat = Float.parseFloat(availableSpaceInGB);
+        Long availableSpaceInMB = Math.round(availableSpaceInGBFloat / 1024.0);
 
         return thresholdSpaceMB <= availableSpaceInMB;
     }

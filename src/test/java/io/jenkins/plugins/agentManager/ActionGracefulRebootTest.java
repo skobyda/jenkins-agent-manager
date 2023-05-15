@@ -2,11 +2,10 @@ package io.jenkins.plugins.agentManager;
 
 import hudson.model.FreeStyleProject;
 import hudson.slaves.DumbSlave;
-import io.jenkins.plugins.agentManager.Actions.PostBuild.GracefulReboot;
-import io.jenkins.plugins.agentManager.Actions.PostBuild.Reboot;
+import io.jenkins.plugins.agentManager.Actions.PostBuild.GracefulRebootPostBuild;
 import io.jenkins.plugins.agentManager.Actions.PostBuildAction;
 import io.jenkins.plugins.agentManager.BuildEntries.PostBuildEntry;
-import io.jenkins.plugins.agentManager.Conditions.PostBuild.NoCondition;
+import io.jenkins.plugins.agentManager.Conditions.PostBuild.NoConditionPostBuild;
 import io.jenkins.plugins.agentManager.Conditions.PostBuildCondition;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,8 +25,8 @@ public class ActionGracefulRebootTest {
     public void testGracefulReboot() throws Exception {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
-        PostBuildCondition condition = new NoCondition();
-        PostBuildAction action = new GracefulReboot();
+        PostBuildCondition condition = new NoConditionPostBuild();
+        PostBuildAction action = new GracefulRebootPostBuild();
         PostBuildEntry entry = new PostBuildEntry(condition, action);
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(entry));
         FreeStyleProject freeStyleProject = TestHelper.setupProject(jenkinsRule, slave);

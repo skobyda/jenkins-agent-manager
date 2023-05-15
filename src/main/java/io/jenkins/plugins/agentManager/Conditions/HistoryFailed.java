@@ -8,6 +8,8 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.RunList;
 
+import java.util.Objects;
+
 public abstract class HistoryFailed implements Condition {
     private final int quantity;
 
@@ -37,7 +39,7 @@ public abstract class HistoryFailed implements Condition {
                 return false;
 
             // If some introspected builds didn't fail, condition doesn't pass
-            if (!previousRun.getResult().equals(Result.FAILURE))
+            if (!Objects.equals(previousRun.getResult(), Result.FAILURE))
                 return false;
 
             previousRun = previousRun.getPreviousBuild();

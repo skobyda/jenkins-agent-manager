@@ -13,11 +13,7 @@ public class ShellScriptRunner {
     public void run(Launcher launcher, TaskListener listener, String script) {
         try {
             executeScript(launcher, listener, script);
-        } catch (IOException e) {
-            // TODO e.printStackTrace(listener.fatalError());
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            // TODO
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
@@ -27,11 +23,7 @@ public class ShellScriptRunner {
         try {
             if (executeScript(launcher, listener, scriptContent) != 0)
                 condition = false;
-        } catch (IOException e) {
-            // TODO
-            condition = false;
-        } catch (InterruptedException e) {
-        // TODO
+        } catch (IOException | InterruptedException e) {
             condition = false;
         }
 

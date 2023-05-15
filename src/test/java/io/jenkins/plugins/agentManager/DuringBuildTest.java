@@ -3,11 +3,11 @@ package io.jenkins.plugins.agentManager;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.slaves.DumbSlave;
-import io.jenkins.plugins.agentManager.Actions.DuringBuild.SetOffline;
+import io.jenkins.plugins.agentManager.Actions.DuringBuild.SetOfflineDuringBuild;
 import io.jenkins.plugins.agentManager.Actions.DuringBuildAction;
 import io.jenkins.plugins.agentManager.BuildEntries.BuildEntry;
 import io.jenkins.plugins.agentManager.BuildEntries.DuringBuildEntry;
-import io.jenkins.plugins.agentManager.Conditions.DuringBuild.NoCondition;
+import io.jenkins.plugins.agentManager.Conditions.DuringBuild.NoConditionDuringBuild;
 import io.jenkins.plugins.agentManager.Conditions.DuringBuildCondition;
 import io.jenkins.plugins.agentManager.Utils.Time;
 import org.junit.Rule;
@@ -44,8 +44,8 @@ public class DuringBuildTest {
     public void testDuringBuildEntriesInLoop() throws Exception {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
-        DuringBuildCondition duringBuildCondition = new NoCondition();
-        DuringBuildAction duringBuildAction = new SetOffline();
+        DuringBuildCondition duringBuildCondition = new NoConditionDuringBuild();
+        DuringBuildAction duringBuildAction = new SetOfflineDuringBuild();
         DuringBuildEntry duringBuildEntry = new DuringBuildEntry(1L, Time.getMillisecondsString(), true, duringBuildCondition, duringBuildAction);
         FreeStyleProject freeStyleProject = setupProject(Arrays.asList(duringBuildEntry));
 
@@ -67,8 +67,8 @@ public class DuringBuildTest {
     public void testDuringBuildEntriesRunOnce() throws Exception {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
-        DuringBuildCondition duringBuildCondition = new NoCondition();
-        DuringBuildAction duringBuildAction = new SetOffline();
+        DuringBuildCondition duringBuildCondition = new NoConditionDuringBuild();
+        DuringBuildAction duringBuildAction = new SetOfflineDuringBuild();
         DuringBuildEntry duringBuildEntry = new DuringBuildEntry(1L, Time.getMillisecondsString(), false, duringBuildCondition, duringBuildAction);
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(duringBuildEntry));
         FreeStyleProject freeStyleProject = TestHelper.setupProject(jenkinsRule, slave);

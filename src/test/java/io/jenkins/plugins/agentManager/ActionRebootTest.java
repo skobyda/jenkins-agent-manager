@@ -1,14 +1,11 @@
 package io.jenkins.plugins.agentManager;
 
 import hudson.model.FreeStyleProject;
-import hudson.model.Result;
 import hudson.slaves.DumbSlave;
-import hudson.tasks.Shell;
-import io.jenkins.plugins.agentManager.Actions.PostBuild.Reboot;
-import io.jenkins.plugins.agentManager.Actions.PostBuild.ShellScript;
+import io.jenkins.plugins.agentManager.Actions.PostBuild.RebootPostBuild;
 import io.jenkins.plugins.agentManager.Actions.PostBuildAction;
 import io.jenkins.plugins.agentManager.BuildEntries.PostBuildEntry;
-import io.jenkins.plugins.agentManager.Conditions.PostBuild.NoCondition;
+import io.jenkins.plugins.agentManager.Conditions.PostBuild.NoConditionPostBuild;
 import io.jenkins.plugins.agentManager.Conditions.PostBuildCondition;
 import org.junit.Rule;
 import org.junit.Test;
@@ -30,8 +27,8 @@ public class ActionRebootTest {
     public void testReboot() throws Exception {
         logger.capture(42).record(RunListenerImpl.class, Level.ALL);
 
-        PostBuildCondition condition = new NoCondition();
-        PostBuildAction action = new Reboot();
+        PostBuildCondition condition = new NoConditionPostBuild();
+        PostBuildAction action = new RebootPostBuild();
         PostBuildEntry entry = new PostBuildEntry(condition, action);
         DumbSlave slave = TestHelper.setupSlave(jenkinsRule, Arrays.asList(entry));
         FreeStyleProject freeStyleProject = TestHelper.setupProject(jenkinsRule, slave);

@@ -7,7 +7,6 @@ import io.jenkins.plugins.agentManager.Utils.ShellScriptRunner;
 
 public abstract class Script implements Condition {
     private final String scriptText;
-    // TODO support groovy and windows thing
     private final String language;
     public Script(String scriptText) {
         this.scriptText = scriptText;
